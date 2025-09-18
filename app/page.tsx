@@ -133,7 +133,7 @@ export default function Home() {
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-h-0">
         <div className="border-b p-4 flex items-center justify-between flex-shrink-0">
-          <h1 className="text-xl font-semibold">Travel Planning Assistant</h1>
+          <h1 className="text-xl font-semibold">Accomodations Booking Assistant</h1>
           <ThemeToggle />
         </div>
 
@@ -144,7 +144,7 @@ export default function Home() {
               {limitedMessages.length === 0 ? (
                 <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center min-h-96">
                   <div className="space-y-1">
-                    <h3 className="font-medium text-sm">Welcome to your Travel Planning Assistant!</h3>
+                    <h3 className="font-medium text-sm">Welcome to your Booking Assistant!</h3>
                     <p className="text-muted-foreground text-sm">I'm here to help you find the perfect accommodations for your trip. Please tell me about your travel destination, dates, number of guests, and budget to get started.</p>
                   </div>
                 </div>
