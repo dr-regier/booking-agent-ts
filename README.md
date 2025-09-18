@@ -1,33 +1,44 @@
-# TypeScript Next.js AI SDK 5 Starter
+# Booking Agent - TypeScript Next.js AI Chat Application
 
-Minimal starter for AI apps with Next.js 15, TypeScript, AI SDK 5, shadcn/ui, and AI Elements.
+A modern AI-powered chat application built with Next.js 15, TypeScript, AI SDK 5, shadcn/ui, and AI Elements for intelligent booking assistance and travel planning.
 
 ## Features
 
-- Clean chat interface with GPT-5
-- AI Elements components (Conversation, Message, PromptInput)
-- shadcn/ui design system
-- Non-streaming responses
-- TypeScript ready
+- **Clean Chat Interface** with GPT-4 integration
+- **AI Elements Components** (Conversation, Message, PromptInput)
+- **shadcn/ui Design System** for modern, accessible UI
+- **TypeScript Ready** with full type safety
+- **Responsive Design** optimized for all devices
+- **Real-time AI Responses** for booking assistance
 
-## Setup
+## Quick Start
 
-1. Install dependencies:
-   ```bash
-   pnpm install
-   ```
+### 1. Clone the Repository
+```bash
+git clone https://github.com/dr-regier/booking-agent-ts.git
+cd booking-agent-ts
+```
 
-2. Create `.env.local` file:
-   ```bash
-   echo "OPENAI_API_KEY=your_openai_api_key_here" > .env.local
-   ```
+### 2. Install Dependencies
+```bash
+pnpm install
+```
 
-3. Start development:
-   ```bash
-   pnpm dev
-   ```
+### 3. Environment Setup
+Create `.env.local` file:
+```bash
+echo "OPENAI_API_KEY=your_openai_api_key_here" > .env.local
+```
 
-Open [http://localhost:3001](http://localhost:3001) to chat with the AI assistant.
+### 4. Start Development
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to start chatting with the AI assistant.
+
+## Repository
+- **GitHub**: [dr-regier/booking-agent-ts](https://github.com/dr-regier/booking-agent-ts)
 
 ## Resources
 
