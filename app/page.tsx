@@ -25,6 +25,8 @@ import { SearchAccommodations, SearchResults } from "@/components/search-accommo
 import type { TravelCriteria } from "@/lib/types/travel";
 import { extractTravelCriteria, mergeTravelCriteria } from "@/lib/utils/travel-extractor";
 import { extractEnhancedCriteria, mergeEnhancedCriteria } from "@/lib/utils/enhanced-extractor";
+import { formatAIResponse } from "@/lib/utils/format-response";
+import { FormattedMessage } from "@/components/formatted-message";
 
 interface AccommodationResult {
   id: string;
@@ -38,6 +40,9 @@ interface AccommodationResult {
 
 export default function Home() {
   const [messages, setMessages] = useState<UIMessage[]>([]);
+
+  // Keep only the last 10 messages to reduce context size
+  const limitedMessages = messages.slice(-10);
   const [isLoading, setIsLoading] = useState(false);
   const [travelCriteria, setTravelCriteria] = useState<TravelCriteria>({});
   const [searchResults, setSearchResults] = useState<AccommodationResult[]>([]);
@@ -66,19 +71,24 @@ export default function Home() {
     });
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: message.text }),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (response.ok) {
         const assistantMessage: UIMessage = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: data.response,
+          content: formatAIResponse(data.response),
         };
         setMessages((prev) => [...prev, assistantMessage]);
       } else {
@@ -86,10 +96,16 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error:", error);
+      let errorContent = "Sorry, I encountered an error. Please try again.";
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        errorContent = "The request timed out. Please try again with a shorter message.";
+      }
+
       const errorMessage: UIMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
+        content: errorContent,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -111,16 +127,16 @@ export default function Home() {
 
         <Conversation className="flex-1">
           <ConversationContent className="space-y-4">
-            {messages.length === 0 ? (
+            {limitedMessages.length === 0 ? (
               <ConversationEmptyState
                 title="Welcome to your Travel Planning Assistant!"
                 description="I'm here to help you find the perfect accommodations for your trip. Please tell me about your travel destination, dates, number of guests, and budget to get started."
               />
             ) : (
-              messages.map((message) => (
+              limitedMessages.map((message) => (
                 <Message key={message.id} from={message.role}>
                   <MessageContent>
-                    {message.content}
+                    <FormattedMessage content={message.content} role={message.role} />
                   </MessageContent>
                 </Message>
               ))

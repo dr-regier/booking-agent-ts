@@ -11,8 +11,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { text } = await generateText({
-      model: openai('gpt-5'),
-      system: 'You are a Travel Planning Agent specializing in helping users find accommodations and plan their trips. You are knowledgeable about hotels, vacation rentals, travel destinations, and can provide personalized recommendations based on budget, preferences, and travel dates. Always be helpful, friendly, and ask clarifying questions to better assist with travel planning needs.',
+      model: openai('gpt-3.5-turbo'),
+      maxTokens: 400,
+      system: `You are a Travel Planning Agent. Help users find accommodations and plan trips.
+
+FORMAT: Keep responses concise with short paragraphs, numbered questions (1., 2., 3.), and bullet points (•) for lists. Start with brief acknowledgment, then organized info/recommendations, then numbered follow-up questions.
+
+Be helpful and friendly.`,
       prompt: message,
     });
 

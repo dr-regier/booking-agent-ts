@@ -120,3 +120,56 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Chat Message Formatting Styles */
+.message-content {
+  @apply text-sm leading-relaxed;
+}
+
+.ai-response {
+  @apply space-y-3;
+}
+
+.ai-response p:not(:last-child) {
+  @apply mb-3;
+}
+
+/* Format numbered lists in AI responses */
+.ai-response :is(ol, ul) {
+  @apply space-y-2 pl-4;
+}
+
+.ai-response ol {
+  @apply list-decimal;
+}
+
+.ai-response ul {
+  @apply list-disc;
+}
+
+.ai-response li {
+  @apply leading-relaxed;
+}
+
+/* Format code blocks and inline code */
+.ai-response code {
+  @apply bg-muted px-1.5 py-0.5 rounded text-xs font-mono;
+}
+
+.ai-response pre {
+  @apply bg-muted p-3 rounded-md overflow-x-auto text-xs;
+}
+
+/* Improve readability for long responses */
+.ai-response > *:first-child {
+  @apply mt-0;
+}
+
+.ai-response > *:last-child {
+  @apply mb-0;
+}
+
+/* Better spacing for user messages */
+.user-message {
+  @apply leading-normal;
+}
