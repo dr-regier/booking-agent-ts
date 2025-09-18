@@ -57,21 +57,52 @@ export function extractEnhancedCriteria(message: string, existing: ExtractedCrit
     extracted.locationPreferences = foundLocationPrefs;
   }
 
-  // Extract property type preferences
+  // Extract property type preferences with enhanced specificity
   const propertyTypePatterns = [
+    // Explicit preferences
     /(?:prefer|want|looking for|need)\s*(?:a|an)?\s*(hotel|resort|inn|lodge)/gi,
     /(?:prefer|want|looking for|need)\s*(?:a|an)?\s*(apartment|condo|flat|rental)/gi,
     /(?:prefer|want|looking for|need)\s*(?:a|an)?\s*(villa|house|home|cottage)/gi,
     /(?:prefer|want|looking for|need)\s*(?:a|an)?\s*(hostel|budget|backpacker)/gi,
     /(?:unique|unusual|special|boutique|distinctive)\s*(?:stay|accommodation|place)/gi,
     /(?:bed and breakfast|b&b|bnb)/gi,
+
+    // Combined preferences
+    /(apartment|house)\s*(?:\/|or)\s*(house|apartment)\s*only/gi,
+    /(apartment|house|rental)\s*only/gi,
+
+    // Exclusions
+    /no\s*(hotels?|resorts?)/gi,
+    /(?:don't|do not)\s*want\s*(hotels?|resorts?)/gi,
   ];
+
+  // Check for exclusions first
+  if (lowerMessage.includes('no hotel') || lowerMessage.includes("don't want hotel") || lowerMessage.includes('do not want hotel')) {
+    if (!extracted.additionalRequests) extracted.additionalRequests = [];
+    if (!extracted.additionalRequests.includes('no hotels')) {
+      extracted.additionalRequests.push('no hotels');
+    }
+  }
 
   for (const pattern of propertyTypePatterns) {
     const matches = Array.from(lowerMessage.matchAll(pattern));
     for (const match of matches) {
       if (match[1]) {
         const type = match[1].toLowerCase();
+
+        // Handle combined preferences
+        if (pattern.source.includes('only')) {
+          if (type.includes('apartment') && type.includes('house')) {
+            extracted.propertyType = 'apartment/house only';
+          } else if (type.includes('apartment')) {
+            extracted.propertyType = 'apartment only';
+          } else if (type.includes('house')) {
+            extracted.propertyType = 'house only';
+          }
+          break;
+        }
+
+        // Regular type extraction
         if (type.includes('hotel') || type.includes('resort') || type.includes('inn')) {
           extracted.propertyType = 'hotel';
         } else if (type.includes('apartment') || type.includes('condo') || type.includes('rental')) {
@@ -131,19 +162,49 @@ export function extractEnhancedCriteria(message: string, existing: ExtractedCrit
 }
 
 export function getEnhancedCriteriaProgress(criteria: TravelCriteria): EnhancedCriteriaProgress {
+  // Count individual pieces of information rather than just categories
+  let detailCount = 0;
+  let totalPossible = 15; // Increased to reflect more granular tracking
+
+  // Trip purpose (1 point)
+  if (criteria.tripPurpose) detailCount += 1;
+
+  // Location preferences (up to 3 points based on specificity)
+  if (criteria.locationPreferences && criteria.locationPreferences.length > 0) {
+    detailCount += Math.min(3, criteria.locationPreferences.length);
+  }
+
+  // Amenities (up to 5 points based on specificity)
+  if (criteria.amenities && criteria.amenities.length > 0) {
+    detailCount += Math.min(5, criteria.amenities.length);
+  }
+
+  // Property type (up to 2 points for specificity)
+  if (criteria.propertyType) {
+    detailCount += 1;
+    if (criteria.propertyType.includes('only') || criteria.propertyType.includes('/')) {
+      detailCount += 1; // Extra point for specific exclusions/preferences
+    }
+  }
+
+  // Flexible cancellation (1 point)
+  if (criteria.flexibleCancellation !== undefined) detailCount += 1;
+
+  // Additional requests (up to 3 points)
+  if (criteria.additionalRequests && criteria.additionalRequests.length > 0) {
+    detailCount += Math.min(3, criteria.additionalRequests.length);
+  }
+
   const progress = {
     tripPurpose: !!criteria.tripPurpose,
     locationPreferences: !!(criteria.locationPreferences && criteria.locationPreferences.length > 0),
     amenities: !!(criteria.amenities && criteria.amenities.length > 0),
     propertyType: !!criteria.propertyType,
     flexibleCancellation: criteria.flexibleCancellation !== undefined,
-    completed: 0,
-    total: 5,
-    percentage: 0,
+    completed: detailCount,
+    total: totalPossible,
+    percentage: Math.round((detailCount / totalPossible) * 100),
   };
-
-  progress.completed = Object.values(progress).slice(0, 5).filter(Boolean).length;
-  progress.percentage = (progress.completed / progress.total) * 100;
 
   return progress;
 }

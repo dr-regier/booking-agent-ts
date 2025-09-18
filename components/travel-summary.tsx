@@ -125,29 +125,32 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
         {/* Enhanced Context Section */}
         {enhancedProgress.completed > 0 && (
           <div className="mt-4 pt-3 border-t">
-            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+            <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
               <Star className="h-4 w-4 text-amber-500" />
-              Enhanced Context ({enhancedProgress.completed}/5)
+              Enhanced Context ({enhancedProgress.completed}/{enhancedProgress.total})
             </h4>
 
             {criteria.tripPurpose && (
-              <div className="flex items-center gap-2 text-sm mb-1">
+              <div className="flex items-center gap-2 text-sm mb-2">
                 <Briefcase className="h-3 w-3 text-muted-foreground" />
                 <span className="capitalize">{criteria.tripPurpose} trip</span>
               </div>
             )}
 
             {criteria.propertyType && (
-              <div className="flex items-center gap-2 text-sm mb-1">
+              <div className="flex items-center gap-2 text-sm mb-2">
                 <Home className="h-3 w-3 text-muted-foreground" />
                 <span className="capitalize">{criteria.propertyType}</span>
               </div>
             )}
 
             {criteria.locationPreferences && criteria.locationPreferences.length > 0 && (
-              <div className="flex items-start gap-2 text-sm mb-1">
-                <LocationIcon className="h-3 w-3 text-muted-foreground mt-0.5" />
-                <div className="flex flex-wrap gap-1">
+              <div className="mb-2">
+                <div className="flex items-center gap-2 text-sm mb-1">
+                  <LocationIcon className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Location Preferences</span>
+                </div>
+                <div className="flex flex-wrap gap-1 ml-5">
                   {criteria.locationPreferences.map((pref, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       {pref}
@@ -157,10 +160,42 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
               </div>
             )}
 
+            {criteria.amenities && criteria.amenities.length > 0 && (
+              <div className="mb-2">
+                <div className="flex items-center gap-2 text-sm mb-1">
+                  <Star className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Required Amenities</span>
+                </div>
+                <div className="flex flex-wrap gap-1 ml-5">
+                  {criteria.amenities.map((amenity, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {amenity}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {criteria.additionalRequests && criteria.additionalRequests.length > 0 && (
+              <div className="mb-2">
+                <div className="flex items-center gap-2 text-sm mb-1">
+                  <AlertTriangle className="h-3 w-3 text-amber-500" />
+                  <span className="text-xs text-muted-foreground">Special Requirements</span>
+                </div>
+                <div className="flex flex-wrap gap-1 ml-5">
+                  {criteria.additionalRequests.map((request, index) => (
+                    <Badge key={index} variant="destructive" className="text-xs">
+                      {request}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {criteria.flexibleCancellation !== undefined && (
               <div className="flex items-center gap-2 text-sm mb-1">
                 <CreditCard className="h-3 w-3 text-muted-foreground" />
-                <span>{criteria.flexibleCancellation ? 'Flexible cancellation needed' : 'Standard cancellation OK'}</span>
+                <span className="text-xs">{criteria.flexibleCancellation ? 'Flexible cancellation needed' : 'Standard cancellation OK'}</span>
               </div>
             )}
           </div>
@@ -175,10 +210,18 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
         )}
 
         {/* Next Enhanced Criteria Hint */}
-        {!nextMissing && nextEnhanced && (
+        {!nextMissing && nextEnhanced && enhancedProgress.completed < 8 && (
           <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 p-2 rounded mt-3">
             <Star className="h-3 w-3" />
             <span>Tell me about your {nextEnhanced} to improve results</span>
+          </div>
+        )}
+
+        {/* Rich context achievement */}
+        {enhancedProgress.completed >= 8 && (
+          <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 p-2 rounded mt-3">
+            <Star className="h-3 w-3" />
+            <span>Rich context captured! Ready for comprehensive search</span>
           </div>
         )}
       </CardContent>

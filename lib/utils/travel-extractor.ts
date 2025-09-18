@@ -6,19 +6,43 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
 
   // Extract destination
   const destinationPatterns = [
-    /(?:going to|traveling to|visiting|trip to|vacation in|staying in)\s+([a-zA-Z\s,]+?)(?:\s|$|,|\.|!|\?)/,
+    // Strong destination indicators (prioritize these)
+    /(?:going to|traveling to|visiting|trip to|vacation in|staying in|flying to|heading to|go to)\s+([a-zA-Z\s,]+?)(?:\s+and|\s+for|\s+from|\s+in|\s*,|\s*\.|\s*!|\s*\?|$)/,
+    // Location-specific patterns (case-insensitive now)
     /(?:in|to)\s+([a-zA-Z\s,]{3,30})(?:\s+for|\s+from|\s+in|\s*,|\s*\.|\s*!|\s*\?|$)/,
   ];
 
+  // Activity words to exclude (things that aren't destinations)
+  const activityWords = [
+    'gym', 'hotel', 'restaurant', 'store', 'mall', 'office', 'bank', 'hospital',
+    'school', 'university', 'work', 'meeting', 'appointment', 'event', 'party',
+    'wedding', 'funeral', 'conference', 'beach', 'park', 'museum', 'theater'
+  ];
+
   for (const pattern of destinationPatterns) {
-    const match = lowerMessage.match(pattern);
-    if (match && match[1]) {
-      const destination = match[1].trim().replace(/^(the|a|an)\s+/i, '');
-      if (destination.length > 2 && destination.length < 50) {
-        extracted.destination = destination;
-        break;
+    const matches = lowerMessage.matchAll(new RegExp(pattern.source, 'gi'));
+    for (const match of matches) {
+      if (match && match[1]) {
+        let destination = match[1].trim().replace(/^(the|a|an)\s+/i, '');
+
+        // Skip if it's clearly an activity, not a destination
+        const isActivity = activityWords.some(activity =>
+          destination.toLowerCase().includes(activity)
+        );
+
+        // Prefer destinations that look like proper place names (multiple words or common place patterns)
+        const looksLikePlace = destination.includes(' ') || /\b(philippines?|island|city|beach|resort|hotel)\b/i.test(destination);
+
+        if (!isActivity && destination.length > 2 && destination.length < 50) {
+          // Prioritize if it looks like a place name
+          if (looksLikePlace || !extracted.destination) {
+            extracted.destination = destination;
+            if (looksLikePlace) break; // Stop on first proper place name
+          }
+        }
       }
     }
+    if (extracted.destination) break;
   }
 
   // Extract dates - enhanced patterns
@@ -119,18 +143,59 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     if (extracted.budget) break; // Found budget, stop looking
   }
 
-  // Extract amenities
-  const amenityKeywords = [
-    'pool', 'wifi', 'parking', 'gym', 'spa', 'restaurant', 'bar', 'beach',
-    'ocean view', 'city view', 'balcony', 'kitchen', 'breakfast', 'pets allowed',
-    'non-smoking', 'air conditioning', 'concierge', 'business center', 'elevator',
-    'wheelchair accessible', 'family-friendly', 'adults only', 'all-inclusive'
-  ];
+  // Extract amenities with enhanced specificity
+  const specificAmenities: { [key: string]: string[] } = {
+    // Kitchen specifications
+    'full kitchen': ['full kitchen', 'complete kitchen', 'equipped kitchen'],
+    'kitchenette': ['kitchenette', 'mini kitchen', 'small kitchen'],
+    'kitchen': ['kitchen'],
+
+    // Bed specifications
+    'queen bed': ['queen bed', 'queen size bed', 'queen-size bed'],
+    'king bed': ['king bed', 'king size bed', 'king-size bed'],
+    'double bed': ['double bed'],
+    'twin beds': ['twin beds', 'twin bed', 'two beds'],
+
+    // Air conditioning
+    'AC': ['air conditioning', 'ac', 'a/c', 'aircon', 'climate control'],
+
+    // Internet
+    'strong wifi': ['strong wifi', 'fast wifi', 'high speed wifi', 'good wifi', 'reliable wifi'],
+    'wifi': ['wifi', 'wi-fi', 'internet', 'wireless'],
+
+    // Gym access
+    'gym nearby': ['gym nearby', 'nearby gym', 'gym close', 'fitness nearby', 'gym within walking'],
+    'gym': ['gym', 'fitness center', 'fitness room', 'workout room'],
+
+    // General amenities
+    'pool': ['pool', 'swimming pool'],
+    'parking': ['parking', 'garage'],
+    'spa': ['spa'],
+    'restaurant': ['restaurant'],
+    'bar': ['bar'],
+    'beach': ['beach', 'beachfront'],
+    'ocean view': ['ocean view', 'sea view', 'water view'],
+    'city view': ['city view'],
+    'balcony': ['balcony', 'terrace', 'patio'],
+    'breakfast': ['breakfast', 'breakfast included'],
+    'pets allowed': ['pets allowed', 'pet friendly', 'pet-friendly'],
+    'non-smoking': ['non-smoking', 'no smoking'],
+    'concierge': ['concierge'],
+    'business center': ['business center'],
+    'elevator': ['elevator', 'lift'],
+    'wheelchair accessible': ['wheelchair accessible', 'handicap accessible'],
+    'family-friendly': ['family-friendly', 'family friendly'],
+    'adults only': ['adults only', 'adult only'],
+    'all-inclusive': ['all-inclusive', 'all inclusive']
+  };
 
   const foundAmenities: string[] = [];
-  for (const amenity of amenityKeywords) {
-    if (lowerMessage.includes(amenity)) {
-      foundAmenities.push(amenity);
+  for (const [amenityName, patterns] of Object.entries(specificAmenities)) {
+    for (const pattern of patterns) {
+      if (lowerMessage.includes(pattern)) {
+        foundAmenities.push(amenityName);
+        break; // Found this amenity, move to next
+      }
     }
   }
 
