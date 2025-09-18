@@ -77,7 +77,13 @@ export default function Home() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: message.text }),
+        body: JSON.stringify({
+          message: message.text,
+          messageHistory: limitedMessages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          }))
+        }),
         signal: controller.signal,
       });
 
