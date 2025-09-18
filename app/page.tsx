@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -46,6 +46,12 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [travelCriteria, setTravelCriteria] = useState<TravelCriteria>({});
   const [searchResults, setSearchResults] = useState<AccommodationResult[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [limitedMessages, isLoading]);
 
   const handleSubmit = async (
     message: { text?: string; files?: any[] },
@@ -125,48 +131,58 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex max-w-7xl mx-auto gap-4">
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col">
-        <div className="border-b p-4 flex items-center justify-between">
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="border-b p-4 flex items-center justify-between flex-shrink-0">
           <h1 className="text-xl font-semibold">Travel Planning Assistant</h1>
           <ThemeToggle />
         </div>
 
-        <Conversation className="flex-1">
-          <ConversationContent className="space-y-4">
-            {limitedMessages.length === 0 ? (
-              <ConversationEmptyState
-                title="Welcome to your Travel Planning Assistant!"
-                description="I'm here to help you find the perfect accommodations for your trip. Please tell me about your travel destination, dates, number of guests, and budget to get started."
-              />
-            ) : (
-              limitedMessages.map((message) => (
-                <Message key={message.id} from={message.role}>
+        {/* Chat content container that can grow naturally */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
+              {limitedMessages.length === 0 ? (
+                <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center min-h-96">
+                  <div className="space-y-1">
+                    <h3 className="font-medium text-sm">Welcome to your Travel Planning Assistant!</h3>
+                    <p className="text-muted-foreground text-sm">I'm here to help you find the perfect accommodations for your trip. Please tell me about your travel destination, dates, number of guests, and budget to get started.</p>
+                  </div>
+                </div>
+              ) : (
+                limitedMessages.map((message) => (
+                  <Message key={message.id} from={message.role}>
+                    <MessageContent>
+                      <FormattedMessage content={message.content} role={message.role} />
+                    </MessageContent>
+                  </Message>
+                ))
+              )}
+              {isLoading && (
+                <Message from="assistant">
                   <MessageContent>
-                    <FormattedMessage content={message.content} role={message.role} />
+                    Thinking...
                   </MessageContent>
                 </Message>
-              ))
-            )}
-            {isLoading && (
-              <Message from="assistant">
-                <MessageContent>
-                  Thinking...
-                </MessageContent>
-              </Message>
-            )}
-          </ConversationContent>
-        </Conversation>
+              )}
+              {/* Invisible element to scroll to */}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
 
-        <div className="p-4">
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputBody>
-              <PromptInputTextarea placeholder="Tell me about your travel plans..." />
-              <PromptInputToolbar>
-                <div />
-                <PromptInputSubmit status={isLoading ? "submitted" : undefined} />
-              </PromptInputToolbar>
-            </PromptInputBody>
-          </PromptInput>
+          {/* Input area that flows naturally after messages */}
+          <div className="flex-shrink-0 border-t bg-background">
+            <div className="max-w-4xl mx-auto p-4">
+              <PromptInput onSubmit={handleSubmit}>
+                <PromptInputBody>
+                  <PromptInputTextarea placeholder="Tell me about your travel plans..." />
+                  <PromptInputToolbar>
+                    <div />
+                    <PromptInputSubmit status={isLoading ? "submitted" : undefined} />
+                  </PromptInputToolbar>
+                </PromptInputBody>
+              </PromptInput>
+            </div>
+          </div>
         </div>
       </div>
 
