@@ -84,13 +84,31 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     /(?:group\s+of|total\s+of)\s+(\d+)/gi,
     /(\d+)\s+(?:bed|room)s?\s+(?:for|needed)/gi, // Infer from room requests
     /(?:we\s+are|there\s+are)\s+(\d+)\s+of\s+us/gi,
+    // Word number patterns
+    /(one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:guests?|people|persons?|adults?|travelers?)/gi,
+    /(?:for|with)\s+(one|two|three|four|five|six|seven|eight|nine|ten)(?:\s+(?:guests?|people|persons?|adults?|travelers?))?/gi,
+    /party\s+of\s+(one|two|three|four|five|six|seven|eight|nine|ten)/gi,
   ];
+
+  // Helper function to convert word numbers to integers
+  const wordToNumber = (word: string): number => {
+    const wordMap: { [key: string]: number } = {
+      'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+      'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+    };
+    return wordMap[word.toLowerCase()] || 0;
+  };
 
   for (const pattern of guestPatterns) {
     const matches = Array.from(lowerMessage.matchAll(pattern));
     for (const match of matches) {
       if (match && match[1]) {
-        const guests = parseInt(match[1]);
+        // Try parsing as number first, then as word
+        let guests = parseInt(match[1]);
+        if (isNaN(guests)) {
+          guests = wordToNumber(match[1]);
+        }
+
         if (guests > 0 && guests <= 20) { // Reasonable max for accommodations
           extracted.guests = guests;
           break;
