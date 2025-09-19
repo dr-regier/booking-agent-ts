@@ -1,4 +1,5 @@
 import type { TravelCriteria, ExtractedCriteria } from "@/lib/types/travel";
+import { findCityInfo, formatLocation } from "./city-database";
 
 export function extractTravelCriteria(message: string): ExtractedCriteria {
   const extracted: ExtractedCriteria = {};
@@ -48,8 +49,15 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
                                isProperNoun;
 
         if (!isActivity && destination.length > 2 && destination.length < 50) {
-          // Prioritize if it looks like a place name
-          if (looksLikePlace || !extracted.destination) {
+          // Try to find city in database for intelligent formatting
+          const cityInfo = findCityInfo(destination);
+
+          if (cityInfo) {
+            // Found in database - use proper formatting
+            extracted.destination = formatLocation(cityInfo);
+            break; // Stop on database match
+          } else if (looksLikePlace || !extracted.destination) {
+            // Fallback to original logic for unknown cities
             extracted.destination = destination;
             if (looksLikePlace) break; // Stop on first proper place name
           }
