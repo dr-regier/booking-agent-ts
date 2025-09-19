@@ -40,6 +40,7 @@ interface AccommodationResult {
 
 export default function Home() {
   const [messages, setMessages] = useState<UIMessage[]>([]);
+  const [lastMessageId, setLastMessageId] = useState<string | null>(null);
 
   // Keep only the last 10 messages to reduce context size
   const limitedMessages = messages.slice(-10);
@@ -105,6 +106,7 @@ export default function Home() {
           role: "assistant",
           content: formatAIResponse(data.response),
         };
+        setLastMessageId(assistantMessage.id);
         setMessages((prev) => [...prev, assistantMessage]);
       } else {
         throw new Error(data.error || "Failed to get response");
@@ -129,40 +131,59 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen bg-background flex max-w-7xl mx-auto gap-4">
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex max-w-7xl mx-auto gap-6 p-4 animate-in fade-in duration-700">
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col h-full">
-        <div className="border-b p-4 flex items-center justify-between flex-shrink-0">
-          <h1 className="text-xl font-semibold">Accommodations Booking Assistant</h1>
+      <div className="flex-1 flex flex-col h-full backdrop-blur-sm bg-white/5 rounded-2xl shadow-2xl border border-white/20 animate-in slide-in-from-left duration-500 delay-100">
+        <div className="backdrop-blur-md bg-white/10 border-b border-white/20 p-6 flex items-center justify-between flex-shrink-0 rounded-t-2xl">
+          <h1 className="text-2xl font-bold text-white drop-shadow-lg transition-all duration-300 hover:text-blue-200 cursor-default">Accommodations Booking Assistant</h1>
           <ThemeToggle />
         </div>
 
         {/* Chat content container with fixed height */}
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
+            <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
               {limitedMessages.length === 0 ? (
-                <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center min-h-96">
-                  <div className="space-y-1">
-                    <h3 className="font-medium text-sm">Welcome to your Booking Assistant!</h3>
-                    <p className="text-muted-foreground text-sm">I'm here to help you find the perfect accommodations for your trip. Please tell me about your travel destination, dates, number of guests, and budget to get started.</p>
+                <div className="flex size-full flex-col items-center justify-center gap-6 p-8 text-center min-h-96">
+                  <div className="backdrop-blur-md bg-white/10 rounded-2xl p-8 shadow-xl border border-white/20 space-y-4">
+                    <h3 className="font-semibold text-lg text-white drop-shadow-lg">Welcome to your Booking Assistant!</h3>
+                    <p className="text-white/80 text-sm leading-relaxed">I'm here to help you find the perfect accommodations for your trip. Please tell me about your travel destination, dates, number of guests, and budget to get started.</p>
                   </div>
                 </div>
               ) : (
-                limitedMessages.map((message) => (
-                  <Message key={message.id} from={message.role}>
-                    <MessageContent>
-                      <FormattedMessage content={message.content} role={message.role} />
-                    </MessageContent>
-                  </Message>
+                limitedMessages.map((message, index) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className={`max-w-2xl backdrop-blur-md rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-102 ${
+                      message.role === 'user'
+                        ? 'bg-blue-500/20 border-blue-400/30 text-white hover:bg-blue-500/30'
+                        : 'bg-white/10 border-white/20 text-white hover:bg-white/15'
+                    } p-4 group`}>
+                      <FormattedMessage
+                        content={message.content}
+                        role={message.role}
+                        isNew={message.role === 'assistant' && message.id === lastMessageId}
+                      />
+                    </div>
+                  </div>
                 ))
               )}
               {isLoading && (
-                <Message from="assistant">
-                  <MessageContent>
-                    Thinking...
-                  </MessageContent>
-                </Message>
+                <div className="flex justify-start">
+                  <div className="max-w-2xl backdrop-blur-md bg-white/10 border-white/20 text-white rounded-2xl shadow-lg border p-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-pulse">Thinking...</div>
+                      <div className="flex space-x-1">
+                        <div className="w-1 h-1 bg-white/60 rounded-full animate-bounce"></div>
+                        <div className="w-1 h-1 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-1 h-1 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
               {/* Invisible element to scroll to */}
               <div ref={messagesEndRef} />
@@ -170,35 +191,49 @@ export default function Home() {
           </div>
 
           {/* Input area pinned to bottom */}
-          <div className="flex-shrink-0 border-t bg-background">
-            <div className="max-w-4xl mx-auto p-4">
-              <PromptInput onSubmit={handleSubmit}>
-                <PromptInputBody>
-                  <PromptInputTextarea placeholder="Tell me about your travel plans..." />
-                  <PromptInputToolbar>
-                    <div />
-                    <PromptInputSubmit status={isLoading ? "submitted" : undefined} />
-                  </PromptInputToolbar>
-                </PromptInputBody>
-              </PromptInput>
+          <div className="flex-shrink-0 backdrop-blur-md bg-white/5 border-t border-white/20 rounded-b-2xl">
+            <div className="max-w-4xl mx-auto p-6">
+              <div className="backdrop-blur-sm bg-white/10 rounded-2xl shadow-lg border border-white/20 p-1 transition-all duration-200 hover:shadow-xl hover:bg-white/15">
+                <PromptInput onSubmit={handleSubmit}>
+                  <PromptInputBody>
+                    <PromptInputTextarea
+                      placeholder="Tell me about your travel plans..."
+                      className="bg-transparent text-white placeholder-white/60 border-none focus:ring-0 resize-none"
+                    />
+                    <PromptInputToolbar className="border-t border-white/10">
+                      <div />
+                      <PromptInputSubmit
+                        status={isLoading ? "submitted" : undefined}
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                      />
+                    </PromptInputToolbar>
+                  </PromptInputBody>
+                </PromptInput>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Travel summary sidebar - fixed height with scroll */}
-      <div className="w-80 h-full border-l p-4 bg-muted/10 space-y-6 overflow-y-auto">
-        <TravelSummary criteria={travelCriteria} />
+      <div className="w-80 h-full backdrop-blur-sm bg-white/5 rounded-2xl shadow-2xl border border-white/20 p-6 space-y-6 overflow-y-auto animate-in slide-in-from-right duration-500 delay-200">
+        <div className="animate-in fade-in duration-500 delay-300">
+          <TravelSummary criteria={travelCriteria} />
+        </div>
 
-        <SearchAccommodations
-          criteria={travelCriteria}
-          onSearchResults={setSearchResults}
-        />
+        <div className="animate-in fade-in duration-500 delay-400">
+          <SearchAccommodations
+            criteria={travelCriteria}
+            onSearchResults={setSearchResults}
+          />
+        </div>
 
-        <SearchResults
-          results={searchResults}
-          onClear={() => setSearchResults([])}
-        />
+        <div className="animate-in fade-in duration-500 delay-500">
+          <SearchResults
+            results={searchResults}
+            onClear={() => setSearchResults([])}
+          />
+        </div>
       </div>
     </div>
   );

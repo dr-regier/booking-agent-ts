@@ -42,11 +42,12 @@ export function ThemeToggle() {
       size="icon"
       onClick={toggleTheme}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+      className="backdrop-blur-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-white/20 rounded-xl"
     >
       {isDark ? (
-        <SunIcon className="h-4 w-4" />
+        <SunIcon className="h-4 w-4 transition-all duration-300 hover:text-yellow-300" />
       ) : (
-        <MoonIcon className="h-4 w-4" />
+        <MoonIcon className="h-4 w-4 transition-all duration-300 hover:text-blue-300" />
       )}
     </Button>
   );

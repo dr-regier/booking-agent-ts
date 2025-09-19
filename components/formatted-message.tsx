@@ -1,11 +1,22 @@
 import React from 'react';
+import { TypewriterText } from './typewriter-text';
 
 interface FormattedMessageProps {
   content: string;
   role: 'user' | 'assistant';
+  isNew?: boolean;
 }
 
-export function FormattedMessage({ content, role }: FormattedMessageProps) {
+export function FormattedMessage({ content, role, isNew = false }: FormattedMessageProps) {
+  // For AI responses that are new, use typewriter effect
+  if (role === 'assistant' && isNew) {
+    return (
+      <div className="message-content ai-response">
+        <TypewriterText text={content} speed={30} />
+      </div>
+    );
+  }
+
   // Parse the content and convert it to JSX
   const parseContent = (text: string) => {
     const paragraphs = text.split('\n\n');

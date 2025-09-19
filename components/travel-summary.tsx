@@ -28,51 +28,48 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
 
   if (!hasAnyCriteria) {
     return (
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
+      <div className="backdrop-blur-md bg-white/10 rounded-2xl shadow-xl border border-white/20 p-6 transition-all duration-200 hover:shadow-2xl hover:bg-white/15">
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-white/80" />
             Travel Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
+          </h3>
+          <div className="space-y-3">
+            <p className="text-sm text-white/70">
               Start chatting to build your travel criteria
             </p>
-            <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
+            <div className="flex items-center gap-2 text-xs text-amber-200 bg-amber-500/20 backdrop-blur-sm p-3 rounded-xl border border-amber-400/30">
               <AlertTriangle className="h-3 w-3" />
               <span>Start by telling me your destination</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <MapPin className="h-5 w-5" />
+    <div className="backdrop-blur-md bg-white/10 rounded-2xl shadow-xl border border-white/20 p-6 transition-all duration-200 hover:shadow-2xl hover:bg-white/15">
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+          <MapPin className="h-5 w-5 text-white/80" />
           Travel Summary
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </h3>
+        <div className="space-y-4">
         {criteria.destination && (
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{criteria.destination}</span>
+          <div className="flex items-center gap-2 p-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 transition-all duration-200 hover:bg-white/10">
+            <MapPin className="h-4 w-4 text-white/70" />
+            <span className="text-sm font-medium text-white">{criteria.destination}</span>
           </div>
         )}
 
         {(criteria.checkIn || criteria.checkOut) && (
-          <div className="space-y-1">
+          <div className="p-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 space-y-2 transition-all duration-200 hover:bg-white/10">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Dates</span>
+              <Calendar className="h-4 w-4 text-white/70" />
+              <span className="text-sm font-medium text-white">Dates</span>
             </div>
-            <div className="ml-6 text-sm text-muted-foreground">
+            <div className="ml-6 text-sm text-white/80 space-y-1">
               {criteria.checkIn && <div>Check-in: {criteria.checkIn}</div>}
               {criteria.checkOut && <div>Check-out: {criteria.checkOut}</div>}
             </div>
@@ -80,21 +77,21 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
         )}
 
         {criteria.guests && (
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">
+          <div className="flex items-center gap-2 p-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 transition-all duration-200 hover:bg-white/10">
+            <Users className="h-4 w-4 text-white/70" />
+            <span className="text-sm text-white">
               {criteria.guests} guest{criteria.guests > 1 ? 's' : ''}
             </span>
           </div>
         )}
 
         {criteria.budget && (
-          <div className="space-y-1">
+          <div className="p-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 space-y-2 transition-all duration-200 hover:bg-white/10">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Budget</span>
+              <DollarSign className="h-4 w-4 text-white/70" />
+              <span className="text-sm font-medium text-white">Budget</span>
             </div>
-            <div className="ml-6 text-sm text-muted-foreground">
+            <div className="ml-6 text-sm text-white/80">
               {criteria.budget.min && criteria.budget.max ? (
                 `${criteria.budget.currency || '$'}${criteria.budget.min} - ${criteria.budget.currency || '$'}${criteria.budget.max}`
               ) : criteria.budget.max ? (
@@ -107,16 +104,16 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
         )}
 
         {criteria.amenities && criteria.amenities.length > 0 && (
-          <div className="space-y-2">
+          <div className="p-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/10 space-y-3 transition-all duration-200 hover:bg-white/10">
             <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Amenities</span>
+              <Star className="h-4 w-4 text-white/70" />
+              <span className="text-sm font-medium text-white">Amenities</span>
             </div>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-2">
               {criteria.amenities.map((amenity, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
+                <span key={index} className="px-2 py-1 rounded-lg backdrop-blur-sm bg-blue-500/20 border border-blue-400/30 text-xs text-blue-200 transition-all duration-200 hover:bg-blue-500/30">
                   {amenity}
-                </Badge>
+                </span>
               ))}
             </div>
           </div>
@@ -203,7 +200,7 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
 
         {/* Next Missing Criteria Hint */}
         {nextMissing && (
-          <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 p-2 rounded mt-3">
+          <div className="flex items-center gap-2 text-xs text-amber-200 bg-amber-500/20 backdrop-blur-sm p-3 rounded-xl border border-amber-400/30 mt-3">
             <AlertTriangle className="h-3 w-3" />
             <span>Still need: {nextMissing}</span>
           </div>
@@ -211,7 +208,7 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
 
         {/* Next Enhanced Criteria Hint */}
         {!nextMissing && nextEnhanced && enhancedProgress.completed < 8 && (
-          <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 p-2 rounded mt-3">
+          <div className="flex items-center gap-2 text-xs text-blue-200 bg-blue-500/20 backdrop-blur-sm p-3 rounded-xl border border-blue-400/30 mt-3">
             <Star className="h-3 w-3" />
             <span>Tell me about your {nextEnhanced} to improve results</span>
           </div>
@@ -219,12 +216,13 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
 
         {/* Rich context achievement */}
         {enhancedProgress.completed >= 8 && (
-          <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 p-2 rounded mt-3">
+          <div className="flex items-center gap-2 text-xs text-green-200 bg-green-500/20 backdrop-blur-sm p-3 rounded-xl border border-green-400/30 mt-3">
             <Star className="h-3 w-3" />
             <span>Rich context captured! Ready for comprehensive search</span>
           </div>
         )}
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 }
