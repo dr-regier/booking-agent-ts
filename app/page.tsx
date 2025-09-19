@@ -67,6 +67,9 @@ export default function Home() {
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
+    // Reset form immediately after adding message
+    (event.target as HTMLFormElement).reset();
+
     // Extract travel criteria from user message
     const extractedCriteria = extractTravelCriteria(message.text);
     const extractedEnhanced = extractEnhancedCriteria(message.text, extractedCriteria);
@@ -123,9 +126,6 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-
-    // Reset form
-    (event.target as HTMLFormElement).reset();
   };
 
   return (
