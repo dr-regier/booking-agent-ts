@@ -10,6 +10,10 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     /(?:going to|traveling to|visiting|trip to|vacation in|staying in|flying to|heading to|go to)\s+([a-zA-Z\s,]+?)(?:\s+and|\s+for|\s+from|\s+in|\s*,|\s*\.|\s*!|\s*\?|$)/,
     // Location-specific patterns (case-insensitive now)
     /(?:in|to)\s+([a-zA-Z\s,]{3,30})(?:\s+for|\s+from|\s+in|\s*,|\s*\.|\s*!|\s*\?|$)/,
+    // Standalone city/place names (fallback pattern for common cities)
+    /^(new york|chicago|los angeles|miami|paris|london|tokyo|rome|barcelona|amsterdam|berlin|madrid|lisbon|dublin|prague|vienna|athens|budapest|stockholm|copenhagen|oslo|helsinki|warsaw|budapest|zurich|geneva|florence|venice|milan|naples)$/i,
+    // General standalone pattern for proper nouns
+    /^([A-Z][a-zA-Z\s,]{2,30})$/,
   ];
 
   // Activity words to exclude (things that aren't destinations)
@@ -20,7 +24,10 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
   ];
 
   for (const pattern of destinationPatterns) {
-    const matches = lowerMessage.matchAll(new RegExp(pattern.source, 'gi'));
+    // Use original message for patterns that require proper capitalization
+    const searchText = pattern.source.includes('^[A-Z]') ? message : lowerMessage;
+    const matches = searchText.matchAll(new RegExp(pattern.source, 'gi'));
+
     for (const match of matches) {
       if (match && match[1]) {
         let destination = match[1].trim().replace(/^(the|a|an)\s+/i, '');
@@ -30,8 +37,15 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
           destination.toLowerCase().includes(activity)
         );
 
-        // Prefer destinations that look like proper place names (multiple words or common place patterns)
-        const looksLikePlace = destination.includes(' ') || /\b(philippines?|island|city|beach|resort|hotel)\b/i.test(destination);
+        // For known city patterns or proper nouns, accept them
+        const isKnownCity = pattern.source.includes('new york|chicago|los angeles');
+        const isProperNoun = /^[A-Z]/.test(destination);
+
+        // Prefer destinations that look like proper place names
+        const looksLikePlace = destination.includes(' ') ||
+                               /\b(philippines?|island|city|beach|resort|hotel)\b/i.test(destination) ||
+                               isKnownCity ||
+                               isProperNoun;
 
         if (!isActivity && destination.length > 2 && destination.length < 50) {
           // Prioritize if it looks like a place name
