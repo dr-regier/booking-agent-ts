@@ -71,8 +71,37 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     if (extracted.destination) break;
   }
 
-  // Extract dates - enhanced patterns
+  // Helper function to convert relative dates to actual dates
+  const convertRelativeDate = (term: string): string => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const formatDate = (date: Date): string => {
+      return date.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    };
+
+    switch (term.toLowerCase()) {
+      case 'today':
+        return formatDate(today);
+      case 'tomorrow':
+        return formatDate(tomorrow);
+      default:
+        return term;
+    }
+  };
+
+  // Extract dates - enhanced patterns including relative dates
   const datePatterns = [
+    // Relative date patterns (priority)
+    /(?:check.?in|arriving|from)\s+(?:on\s+)?(today|tomorrow)/gi,
+    /(?:check.?out|leaving|departing)\s+(?:on\s+)?(today|tomorrow)/gi,
+    /(today|tomorrow)\s+(?:check.?in|arriving)/gi,
+    /(today|tomorrow)\s+(?:check.?out|leaving|departing)/gi,
     // Specific check-in patterns
     /(?:check.?in|arriving|from)\s+(?:on\s+)?([a-zA-Z]+ \d{1,2}(?:st|nd|rd|th)?,?\s*\d{4}|\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2})/gi,
     // Specific check-out patterns
@@ -89,14 +118,20 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
   for (const pattern of datePatterns) {
     const matches = Array.from(lowerMessage.matchAll(pattern));
     for (const match of matches) {
-      if (pattern.source.includes('check.?in|arriving|from')) {
-        extracted.checkIn = match[1]?.trim();
-      } else if (pattern.source.includes('check.?out|leaving|departing')) {
-        extracted.checkOut = match[1]?.trim();
+      if (pattern.source.includes('check.?in|arriving|from') || pattern.source.includes('today|tomorrow.*check.?in')) {
+        const dateValue = match[1]?.trim();
+        if (dateValue) {
+          extracted.checkIn = convertRelativeDate(dateValue);
+        }
+      } else if (pattern.source.includes('check.?out|leaving|departing') || pattern.source.includes('today|tomorrow.*check.?out')) {
+        const dateValue = match[1]?.trim();
+        if (dateValue) {
+          extracted.checkOut = convertRelativeDate(dateValue);
+        }
       } else if (match[2]) {
         // Date range found
-        extracted.checkIn = match[1]?.trim();
-        extracted.checkOut = match[2]?.trim();
+        extracted.checkIn = convertRelativeDate(match[1]?.trim() || '');
+        extracted.checkOut = convertRelativeDate(match[2]?.trim() || '');
         break; // Use first date range found
       }
     }
