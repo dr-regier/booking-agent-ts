@@ -133,7 +133,7 @@ export default function Home() {
       {/* Main chat area */}
       <div className="flex-1 flex flex-col min-h-0">
         <div className="border-b p-4 flex items-center justify-between flex-shrink-0">
-          <h1 className="text-xl font-semibold">Accomodations Booking Assistant</h1>
+          <h1 className="text-xl font-semibold">Accommodations Booking Assistant</h1>
           <ThemeToggle />
         </div>
 
