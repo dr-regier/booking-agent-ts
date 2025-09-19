@@ -21,7 +21,11 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
   const activityWords = [
     'gym', 'hotel', 'restaurant', 'store', 'mall', 'office', 'bank', 'hospital',
     'school', 'university', 'work', 'meeting', 'appointment', 'event', 'party',
-    'wedding', 'funeral', 'conference', 'beach', 'park', 'museum', 'theater'
+    'wedding', 'funeral', 'conference', 'beach', 'park', 'museum', 'theater',
+    'building', 'high rise', 'tower', 'apartment', 'condo', 'house', 'room',
+    'floor', 'view', 'balcony', 'kitchen', 'bathroom', 'bedroom', 'wifi',
+    'parking', 'pool', 'spa', 'amenity', 'service', 'staff', 'check',
+    'reservation', 'booking', 'price', 'cost', 'budget', 'night', 'stay'
   ];
 
   for (const pattern of destinationPatterns) {
@@ -257,7 +261,14 @@ export function mergeTravelCriteria(
   const merged: TravelCriteria = { ...existing };
 
   if (extracted.destination) {
-    merged.destination = extracted.destination;
+    // Only update destination if we don't have one yet, or if the new one is from a known city database
+    const cityInfo = findCityInfo(extracted.destination);
+    const hasExistingDestination = existing.destination && existing.destination.trim().length > 0;
+
+    if (!hasExistingDestination || cityInfo) {
+      merged.destination = extracted.destination;
+    }
+    // If we have an existing destination and the new one isn't from database, keep existing
   }
 
   if (extracted.checkIn) {
