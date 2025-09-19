@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
 import type { TravelCriteria } from '@/lib/types/travel';
+import { BookingAgent } from '@/lib/booking-automation';
+import { AUTOMATION_CONFIG } from '@/lib/booking-automation/config';
 
 interface AccommodationResult {
   id: string;
@@ -10,6 +12,9 @@ interface AccommodationResult {
   amenities: string[];
   imageUrl?: string;
   location: string;
+  bookingUrl?: string;
+  aiReasoning?: string;
+  matchScore?: number;
 }
 
 const mockAccommodations: Record<string, AccommodationResult[]> = {
@@ -134,72 +139,95 @@ export async function POST(request: NextRequest) {
   try {
     const criteria: TravelCriteria = await request.json();
 
+    // Check if we have sufficient criteria for real search
+    const hasDestination = criteria.destination && criteria.destination.trim().length > 0;
+    const shouldUseRealSearch = hasDestination && AUTOMATION_CONFIG.useRealSearch;
+
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // Send initial progress
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            type: 'progress',
-            message: 'Starting accommodation search...'
-          })}\n\n`));
+          if (shouldUseRealSearch) {
+            // Use real Playwright automation
+            const progressCallback = (message: string) => {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                type: 'progress',
+                message
+              })}\n\n`));
+            };
 
-          await delay(800);
+            const bookingAgent = new BookingAgent(progressCallback);
+            const accommodations = await bookingAgent.searchAccommodations(criteria);
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            type: 'progress',
-            message: 'Searching Booking.com...'
-          })}\n\n`));
+            // Send final results
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'results',
+              accommodations,
+              searchCriteria: criteria
+            })}\n\n`));
 
-          await delay(1000);
+          } else {
+            // Use mock data for development/testing
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'progress',
+              message: 'Starting accommodation search (demo mode)...'
+            })}\n\n`));
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            type: 'progress',
-            message: 'Searching Airbnb...'
-          })}\n\n`));
+            await delay(800);
 
-          await delay(900);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'progress',
+              message: 'Searching Booking.com...'
+            })}\n\n`));
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            type: 'progress',
-            message: 'Searching Hotels.com...'
-          })}\n\n`));
+            await delay(1000);
 
-          await delay(700);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'progress',
+              message: 'Searching Airbnb...'
+            })}\n\n`));
 
-          // Get accommodations based on destination
-          let accommodations = getAccommodationsForDestination(criteria.destination);
+            await delay(900);
 
-          // Filter by budget if provided
-          accommodations = filterByBudget(accommodations, criteria.budget);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'progress',
+              message: 'Searching Hotels.com...'
+            })}\n\n`));
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            type: 'progress',
-            message: `Analyzing ${accommodations.length} properties found...`
-          })}\n\n`));
+            await delay(700);
 
-          await delay(1200);
+            // Get mock accommodations
+            let accommodations = getAccommodationsForDestination(criteria.destination);
+            accommodations = filterByBudget(accommodations, criteria.budget);
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            type: 'progress',
-            message: 'Generating personalized recommendations...'
-          })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'progress',
+              message: `Analyzing ${accommodations.length} properties found...`
+            })}\n\n`));
 
-          await delay(800);
+            await delay(1200);
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            type: 'progress',
-            message: 'Finalizing search results...'
-          })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'progress',
+              message: 'Generating personalized recommendations...'
+            })}\n\n`));
 
-          await delay(500);
+            await delay(800);
 
-          // Send final results
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            type: 'results',
-            accommodations,
-            searchCriteria: criteria
-          })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'progress',
+              message: 'Finalizing search results...'
+            })}\n\n`));
+
+            await delay(500);
+
+            // Send final results
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'results',
+              accommodations,
+              searchCriteria: criteria
+            })}\n\n`));
+          }
 
           // Signal completion
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({
@@ -207,6 +235,7 @@ export async function POST(request: NextRequest) {
           })}\n\n`));
 
         } catch (error) {
+          console.error('Search error:', error);
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({
             type: 'error',
             message: 'Search failed. Please try again.'

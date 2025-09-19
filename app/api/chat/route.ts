@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
 
     const { text } = await generateText({
       model: openai('gpt-3.5-turbo'),
-      maxTokens: 400,
       temperature: 0.7,
       system: `You are an Accommodation Booking Agent that helps users find and book accommodations efficiently. Your role is to collect booking requirements and preferences through focused conversation.
 
