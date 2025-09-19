@@ -198,7 +198,11 @@ export default function Home() {
                   <PromptInputBody>
                     <PromptInputTextarea
                       placeholder="Tell me about your travel plans..."
-                      className="bg-white/10 text-white placeholder-white/60 border-none focus:ring-0 resize-none focus:bg-white/15 transition-all duration-200"
+                      className="text-white placeholder-white/60 border-none focus:ring-0 resize-none transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        color: 'white'
+                      }}
                     />
                     <PromptInputToolbar className="border-t border-white/10">
                       <div />
