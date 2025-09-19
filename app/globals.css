@@ -173,3 +173,38 @@
 .user-message {
   @apply leading-normal;
 }
+
+/* Custom override for the glassmorphism input - more specific selectors */
+.glassmorphism-input textarea,
+.glassmorphism-input form textarea,
+.glassmorphism-input div textarea,
+textarea[name="message"],
+textarea[data-glassmorphism="true"] {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  caret-color: white !important;
+}
+
+.glassmorphism-input textarea:focus,
+.glassmorphism-input form textarea:focus,
+.glassmorphism-input div textarea:focus,
+textarea[name="message"]:focus,
+textarea[data-glassmorphism="true"]:focus {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  caret-color: white !important;
+}
+
+.glassmorphism-input textarea::placeholder,
+.glassmorphism-input form textarea::placeholder,
+.glassmorphism-input div textarea::placeholder,
+textarea[name="message"]::placeholder,
+textarea[data-glassmorphism="true"]::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Force override any competing styles */
+[data-glassmorphism="true"] {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}

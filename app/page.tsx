@@ -193,15 +193,17 @@ export default function Home() {
           {/* Input area pinned to bottom */}
           <div className="flex-shrink-0 backdrop-blur-md bg-white/5 border-t border-white/20 rounded-b-2xl">
             <div className="max-w-4xl mx-auto p-6">
-              <div className="backdrop-blur-sm bg-white/10 rounded-2xl shadow-lg border border-white/20 p-1 transition-all duration-200 hover:shadow-xl hover:bg-white/15">
+              <div className="backdrop-blur-sm bg-white/10 rounded-2xl shadow-lg border border-white/20 p-1 transition-all duration-200 hover:shadow-xl hover:bg-white/15 glassmorphism-input">
                 <PromptInput onSubmit={handleSubmit}>
                   <PromptInputBody>
                     <PromptInputTextarea
                       placeholder="Tell me about your travel plans..."
                       className="text-white placeholder-white/60 border-none focus:ring-0 resize-none transition-all duration-200"
+                      data-glassmorphism="true"
                       style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        color: 'white'
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                        color: 'white',
+                        caretColor: 'white'
                       }}
                     />
                     <PromptInputToolbar className="border-t border-white/10">
