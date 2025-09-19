@@ -8,47 +8,22 @@ export function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Check for saved theme preference or default to dark mode
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = savedTheme === "dark" || (!savedTheme && true);
-    setIsDark(prefersDark);
-
-    // Apply theme to document
-    if (prefersDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    // Force light mode only
+    setIsDark(false);
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
   }, []);
 
-  const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-
-    // Save preference
-    localStorage.setItem("theme", newIsDark ? "dark" : "light");
-
-    // Apply to document
-    if (newIsDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
-
+  // Disabled toggle - always light mode
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={toggleTheme}
-      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-      className="backdrop-blur-sm bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-white/20 rounded-xl"
+      disabled
+      aria-label="Light mode (theme toggle disabled)"
+      className="backdrop-blur-sm bg-white/10 border border-white/20 text-white/50 cursor-not-allowed rounded-xl opacity-50"
     >
-      {isDark ? (
-        <SunIcon className="h-4 w-4 transition-all duration-300 hover:text-yellow-300" />
-      ) : (
-        <MoonIcon className="h-4 w-4 transition-all duration-300 hover:text-blue-300" />
-      )}
+      <SunIcon className="h-4 w-4" />
     </Button>
   );
 }

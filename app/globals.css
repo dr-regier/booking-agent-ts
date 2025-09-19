@@ -208,3 +208,80 @@ textarea[data-glassmorphism="true"]::placeholder {
   background-color: rgba(255, 255, 255, 0.2) !important;
   color: white !important;
 }
+
+/* Override the bg-input class specifically for our glassmorphism input */
+.glassmorphism-input [data-glassmorphism="true"].bg-input {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  caret-color: white !important;
+}
+
+.glassmorphism-input [data-glassmorphism="true"].bg-input:focus {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ultra-specific selector matching the exact HTML structure */
+textarea[data-slot="textarea"][name="message"][data-glassmorphism="true"].bg-input {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  caret-color: white !important;
+}
+
+textarea[data-slot="textarea"][name="message"][data-glassmorphism="true"].bg-input:focus {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Nuclear option - override everything */
+textarea.bg-input[data-glassmorphism="true"] {
+  background: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+/* If all else fails, override at the highest level */
+html body textarea[data-glassmorphism="true"] {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+/* The nuclear option that matches our successful JavaScript test */
+.glassmorphism-input textarea[data-glassmorphism="true"] {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  caret-color: white !important;
+  /* Override any CSS custom properties */
+  --color-foreground: white !important;
+  --foreground: white !important;
+}
+
+/* Use attribute selector with maximum specificity */
+textarea[name="message"][data-glassmorphism="true"][data-slot="textarea"] {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  caret-color: white !important;
+}
+
+/* Force dark text in light mode, white text in dark mode */
+html:not(.dark) textarea[data-glassmorphism="true"],
+body:not(.dark) textarea[data-glassmorphism="true"] {
+  color: #1a1a1a !important;
+  caret-color: #1a1a1a !important;
+}
+
+html.dark textarea[data-glassmorphism="true"],
+body.dark textarea[data-glassmorphism="true"] {
+  color: white !important;
+  caret-color: white !important;
+}
+
+/* Ultra-aggressive override for light mode */
+textarea[data-glassmorphism="true"] {
+  color: #1a1a1a !important;
+  caret-color: #1a1a1a !important;
+}
+
+/* But allow dark mode to override */
+.dark textarea[data-glassmorphism="true"] {
+  color: white !important;
+  caret-color: white !important;
+}
