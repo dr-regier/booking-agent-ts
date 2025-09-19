@@ -183,6 +183,10 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     /(one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:guests?|people|persons?|adults?|travelers?)/gi,
     /(?:for|with)\s+(one|two|three|four|five|six|seven|eight|nine|ten)(?:\s+(?:guests?|people|persons?|adults?|travelers?))?/gi,
     /party\s+of\s+(one|two|three|four|five|six|seven|eight|nine|ten)/gi,
+    // Family relationship patterns - these need special parsing
+    /(?:me|i|myself)(?:\s*,\s*|\s+and\s+)(?:my\s+)?(?:wife|husband|spouse|partner)(?:\s*,\s*|\s+and\s+)(?:(?:one|two|three|four|five)\s+)?(?:child|children|kid|kids|son|daughter|baby|babies)/gi,
+    /(?:me|i|myself)(?:\s*,\s*|\s+and\s+)(?:my\s+)?(?:wife|husband|spouse|partner)/gi,
+    /(?:me|i|myself)(?:\s*,\s*|\s+and\s+)(?:(?:one|two|three|four|five)\s+)?(?:child|children|kid|kids|son|daughter|baby|babies)/gi,
   ];
 
   // Helper function to convert word numbers to integers
@@ -194,10 +198,50 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     return wordMap[word.toLowerCase()] || 0;
   };
 
+  // Helper function to parse family relationships and count total people
+  const parseFamilyCount = (text: string): number => {
+    let count = 0;
+    const lowerText = text.toLowerCase();
+
+    // Count "me/I/myself" (always 1)
+    if (/\b(?:me|i|myself)\b/.test(lowerText)) {
+      count += 1;
+    }
+
+    // Count spouse/partner (always 1)
+    if (/\b(?:wife|husband|spouse|partner)\b/.test(lowerText)) {
+      count += 1;
+    }
+
+    // Count children - look for number before child-related words
+    const childMatch = lowerText.match(/(?:one|two|three|four|five|\d+)\s+(?:child|children|kid|kids|son|daughter|baby|babies)/);
+    if (childMatch) {
+      const childCountStr = childMatch[0].match(/(?:one|two|three|four|five|\d+)/)?.[0];
+      if (childCountStr) {
+        const childCount = isNaN(parseInt(childCountStr)) ? wordToNumber(childCountStr) : parseInt(childCountStr);
+        count += childCount;
+      }
+    } else if (/\b(?:child|children|kid|kids|son|daughter|baby|babies)\b/.test(lowerText)) {
+      // If child-related words without number, assume 1
+      count += 1;
+    }
+
+    return count;
+  };
+
   for (const pattern of guestPatterns) {
     const matches = Array.from(lowerMessage.matchAll(pattern));
     for (const match of matches) {
-      if (match && match[1]) {
+      // Check if this is a family relationship pattern
+      if (pattern.source.includes('me|i|myself') && pattern.source.includes('wife|husband|spouse|partner|child|children')) {
+        const familyCount = parseFamilyCount(match[0]);
+        if (familyCount > 0 && familyCount <= 20) {
+          extracted.guests = familyCount;
+          break; // Family patterns take priority
+        }
+      }
+      // Handle regular number patterns
+      else if (match && match[1]) {
         // Try parsing as number first, then as word
         let guests = parseInt(match[1]);
         if (isNaN(guests)) {
