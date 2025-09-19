@@ -134,7 +134,11 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
 
   // Extract budget - enhanced patterns for per night amounts
   const budgetPatterns = [
-    // Per night patterns (priority)
+    // Per night patterns with "dollars" (priority)
+    /(?:under|below|max|maximum|up to)\s+(\d+(?:,\d{3})*)\s*(?:dollars?|usd|USD)\s*(?:per night|\/night|a night|nightly)/gi,
+    /budget\s+(?:of\s+)?(\d+(?:,\d{3})*)\s*(?:dollars?|usd|USD)\s*(?:per night|\/night|a night|nightly)/gi,
+    /(\d+(?:,\d{3})*)\s*(?:dollars?|usd|USD)\s*(?:per night|\/night|a night|nightly)/gi,
+    // Per night patterns with $ symbol (priority)
     /(?:under|below|max|maximum|up to)\s+\$?(\d+(?:,\d{3})*)\s*(?:per night|\/night|a night|nightly)/gi,
     /budget\s+(?:of\s+)?\$?(\d+(?:,\d{3})*)\s*(?:per night|\/night|a night|nightly)/gi,
     /\$?(\d+(?:,\d{3})*)\s*(?:per night|\/night|a night|nightly)/gi,
