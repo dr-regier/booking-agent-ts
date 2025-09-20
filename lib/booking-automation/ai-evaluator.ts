@@ -87,7 +87,7 @@ export class AIPropertyEvaluator {
 
     try {
       const { text } = await generateText({
-        model: openai('gpt-4o'),
+        model: openai('gpt-4o-mini'),
         temperature: 0.3,
         prompt,
       });
