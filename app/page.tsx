@@ -140,12 +140,41 @@ export default function Home() {
     }
   };
 
+  // Dynamic greeting based on time of day
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning! Ready to plan your next adventure?";
+    if (hour < 17) return "Good afternoon! Let's find your perfect getaway.";
+    return "Good evening! Where shall we explore tonight?";
+  };
+
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex max-w-7xl mx-auto gap-6 p-4 animate-in fade-in duration-700">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-blue-100 flex max-w-7xl mx-auto gap-6 p-6 animate-in fade-in duration-700">
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col h-full backdrop-blur-sm bg-white/5 rounded-2xl shadow-2xl border border-white/20 animate-in slide-in-from-left duration-500 delay-100">
-        <div className="backdrop-blur-md bg-white/10 border-b border-white/20 p-6 flex items-center justify-between flex-shrink-0 rounded-t-2xl">
-          <h1 className="text-2xl font-bold text-white drop-shadow-lg transition-all duration-300 hover:text-blue-200 cursor-default">Accommodations Booking Assistant</h1>
+      <div className="flex-1 flex flex-col h-full bg-white/95 rounded-3xl shadow-2xl border border-gray-200/50 animate-in slide-in-from-left duration-500 delay-100">
+        {/* Enhanced Travel-Themed Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-teal-500 border-b border-blue-500/20 p-6 flex items-center justify-between flex-shrink-0 rounded-t-3xl relative overflow-hidden">
+          {/* Animated Background Elements */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-4 left-20 animate-float">
+              ✈️
+            </div>
+            <div className="absolute top-8 right-32 animate-float-delayed">
+              🧳
+            </div>
+            <div className="absolute bottom-6 left-1/3 animate-float-slow">
+              🧭
+            </div>
+          </div>
+
+          <div className="relative z-10">
+            <h1 className="text-2xl font-bold text-white drop-shadow-lg transition-all duration-300 hover:text-blue-100 cursor-default mb-1">
+              Travel Booking Assistant
+            </h1>
+            <p className="text-blue-100 text-sm font-medium">
+              {getTimeBasedGreeting()}
+            </p>
+          </div>
           <ThemeToggle />
         </div>
 
@@ -155,9 +184,23 @@ export default function Home() {
             <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
               {limitedMessages.length === 0 ? (
                 <div className="flex size-full flex-col items-center justify-center gap-6 p-8 text-center min-h-96">
-                  <div className="backdrop-blur-md bg-white/10 rounded-2xl p-8 shadow-xl border border-white/20 space-y-4">
-                    <h3 className="font-semibold text-lg text-white drop-shadow-lg">Welcome to your Booking Assistant!</h3>
-                    <p className="text-white/80 text-sm leading-relaxed">I'm here to help you find the perfect accommodations for your trip. Please tell me about your travel destination, dates, number of guests, and budget to get started.</p>
+                  <div className="bg-white/90 rounded-2xl p-8 shadow-xl border border-gray-200/50 space-y-4 backdrop-blur-sm">
+                    <div className="text-4xl mb-4">🌍</div>
+                    <h3 className="font-semibold text-xl text-gray-800">Welcome to your Travel Assistant!</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed max-w-md mx-auto">
+                      I'm here to help you discover and book the perfect accommodations for your journey.
+                      Share your destination, dates, number of guests, and budget to get started.
+                    </p>
+                    <div className="flex items-center justify-center gap-4 mt-6 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        Personalized Search
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
+                        AI-Powered Recommendations
+                      </span>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -167,10 +210,10 @@ export default function Home() {
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className={`max-w-2xl backdrop-blur-md rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-102 ${
+                    <div className={`max-w-2xl rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
                       message.role === 'user'
-                        ? 'bg-blue-500/20 border-blue-400/30 text-white hover:bg-blue-500/30'
-                        : 'bg-white/10 border-white/20 text-white hover:bg-white/15'
+                        ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
+                        : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
                     } p-4 group`}>
                       <FormattedMessage
                         content={message.content}
@@ -183,13 +226,13 @@ export default function Home() {
               )}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="max-w-2xl backdrop-blur-md bg-white/10 border-white/20 text-white rounded-2xl shadow-lg border p-4">
+                  <div className="max-w-2xl bg-white/95 border-gray-200 text-gray-800 rounded-2xl shadow-lg border p-4">
                     <div className="flex items-center space-x-2">
-                      <div className="animate-pulse">Thinking...</div>
+                      <div className="animate-pulse text-blue-600">Thinking...</div>
                       <div className="flex space-x-1">
-                        <div className="w-1 h-1 bg-white/60 rounded-full animate-bounce"></div>
-                        <div className="w-1 h-1 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                        <div className="w-1 h-1 bg-white/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
+                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                       </div>
                     </div>
                   </div>
@@ -201,26 +244,20 @@ export default function Home() {
           </div>
 
           {/* Input area pinned to bottom */}
-          <div className="flex-shrink-0 backdrop-blur-md bg-white/5 border-t border-white/20 rounded-b-2xl">
+          <div className="flex-shrink-0 bg-gray-50/80 border-t border-gray-200/50 rounded-b-3xl backdrop-blur-sm">
             <div className="max-w-4xl mx-auto p-6">
-              <div className="backdrop-blur-sm bg-white/10 rounded-2xl shadow-lg border border-white/20 p-1 transition-all duration-200 hover:shadow-xl hover:bg-white/15 glassmorphism-input">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-1 transition-all duration-200 hover:shadow-xl">
                 <PromptInput onSubmit={handleSubmit}>
                   <PromptInputBody>
                     <PromptInputTextarea
                       placeholder="Tell me about your travel plans..."
-                      className="border-none focus:ring-0 resize-none transition-all duration-200"
-                      style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                        color: '#1a1a1a',
-                        caretColor: '#1a1a1a',
-                        '--placeholder-color': 'rgba(26, 26, 26, 0.6)'
-                      } as React.CSSProperties}
+                      className="border-none focus:ring-2 focus:ring-blue-500 resize-none transition-all duration-200 bg-white text-gray-800 placeholder:text-gray-500"
                     />
-                    <PromptInputToolbar className="border-t border-white/10">
+                    <PromptInputToolbar className="border-t border-gray-100">
                       <div />
                       <PromptInputSubmit
                         status={isLoading ? "submitted" : undefined}
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                        className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                       />
                     </PromptInputToolbar>
                   </PromptInputBody>
@@ -232,7 +269,7 @@ export default function Home() {
       </div>
 
       {/* Travel summary sidebar - fixed height with scroll */}
-      <div className="w-80 h-full backdrop-blur-sm bg-white/5 rounded-2xl shadow-2xl border border-white/20 p-6 space-y-6 overflow-y-auto animate-in slide-in-from-right duration-500 delay-200">
+      <div className="w-80 h-full bg-white/95 rounded-3xl shadow-2xl border border-gray-200/50 p-6 space-y-6 overflow-y-auto animate-in slide-in-from-right duration-500 delay-200">
         <div className="animate-in fade-in duration-500 delay-300">
           <TravelSummary criteria={travelCriteria} />
         </div>
