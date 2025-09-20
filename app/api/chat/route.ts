@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const recentHistory = messageHistory.slice(-10);
 
     const { text } = await generateText({
-      model: openai('gpt-3.5-turbo'),
+      model: openai('gpt-4o'),
       temperature: 0.7,
       system: `You are an Accommodation Booking Agent that helps users find and book accommodations efficiently. Your role is to collect booking requirements and preferences through focused conversation.
 
