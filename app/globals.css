@@ -224,3 +224,33 @@
 .travel-input textarea:focus {
   @apply ring-2 ring-blue-500 border-blue-500;
 }
+
+/* Force light textarea styling for travel theme */
+textarea[placeholder*="travel"] {
+  background-color: #f9fafb !important;
+  color: #1f2937 !important;
+  caret-color: #1f2937 !important;
+}
+
+textarea[placeholder*="travel"]:focus {
+  background-color: #f9fafb !important;
+  color: #1f2937 !important;
+}
+
+textarea[placeholder*="travel"]::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Override any competing textarea styles */
+[data-slot="textarea"] {
+  background-color: #f9fafb !important;
+  color: #1f2937 !important;
+}
+
+/* Ensure proper text visibility in light theme */
+.light textarea,
+html:not(.dark) textarea {
+  background-color: #f9fafb !important;
+  color: #1f2937 !important;
+  caret-color: #1f2937 !important;
+}
