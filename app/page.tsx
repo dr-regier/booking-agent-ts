@@ -181,17 +181,17 @@ export default function Home() {
         {/* Chat content container with fixed height */}
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto px-6 py-4 space-y-6">
+            <div className="max-w-4xl mx-auto px-4 py-2 space-y-4">
               {limitedMessages.length === 0 ? (
-                <div className="flex size-full flex-col items-center justify-center gap-4 p-4 text-center">
-                  <div className="bg-white/90 rounded-2xl p-6 shadow-xl border border-gray-200/50 space-y-3 backdrop-blur-sm max-w-lg">
-                    <div className="text-3xl mb-2">🌍</div>
-                    <h3 className="font-semibold text-lg text-gray-800">Welcome to your Travel Assistant!</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
+                <div className="flex items-center justify-center h-full">
+                  <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 space-y-4 max-w-md mx-auto">
+                    <div className="text-3xl text-center">🌍</div>
+                    <h3 className="font-semibold text-lg text-gray-800 text-center">Welcome to your Travel Assistant!</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed text-center">
                       I'm here to help you discover and book the perfect accommodations for your journey.
                       Share your destination, dates, number of guests, and budget to get started.
                     </p>
-                    <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-500">
+                    <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
                       <span className="flex items-center gap-1">
                         <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                         Personalized Search
@@ -244,21 +244,22 @@ export default function Home() {
           </div>
 
           {/* Input area pinned to bottom */}
-          <div className="flex-shrink-0 bg-gray-50/80 border-t border-gray-200/50 rounded-b-3xl backdrop-blur-sm">
+          <div className="flex-shrink-0 bg-white border-t border-gray-200 rounded-b-3xl">
             <div className="max-w-4xl mx-auto p-4">
-              <div className="bg-gray-50 rounded-2xl shadow-lg border border-gray-300 p-2 transition-all duration-200 hover:shadow-xl">
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-300 p-3 transition-all duration-200 hover:shadow-xl travel-input-container">
                 <PromptInput onSubmit={handleSubmit}>
                   <PromptInputBody>
                     <PromptInputTextarea
                       placeholder="Tell me about your travel plans..."
-                      className="border-none focus:ring-2 focus:ring-blue-500 resize-none transition-all duration-200 text-gray-800 placeholder:text-gray-500"
+                      className="travel-textarea"
                       style={{
-                        backgroundColor: '#f9fafb !important',
-                        color: '#1f2937 !important',
-                        caretColor: '#1f2937 !important'
+                        backgroundColor: 'white',
+                        color: '#1f2937',
+                        caretColor: '#1f2937',
+                        border: 'none'
                       } as React.CSSProperties}
                     />
-                    <PromptInputToolbar className="border-t border-gray-200">
+                    <PromptInputToolbar className="border-t border-gray-200 bg-white">
                       <div />
                       <PromptInputSubmit
                         status={isLoading ? "submitted" : undefined}

@@ -225,32 +225,91 @@
   @apply ring-2 ring-blue-500 border-blue-500;
 }
 
-/* Force light textarea styling for travel theme */
-textarea[placeholder*="travel"] {
-  background-color: #f9fafb !important;
+/* AGGRESSIVE TEXTAREA STYLING FIXES */
+
+/* Target the travel input container */
+.travel-input-container textarea,
+.travel-input-container [data-slot="textarea"],
+.travel-textarea {
+  background: white !important;
+  background-color: white !important;
   color: #1f2937 !important;
   caret-color: #1f2937 !important;
+  border: none !important;
 }
 
-textarea[placeholder*="travel"]:focus {
-  background-color: #f9fafb !important;
+.travel-input-container textarea:focus,
+.travel-input-container [data-slot="textarea"]:focus,
+.travel-textarea:focus {
+  background: white !important;
+  background-color: white !important;
   color: #1f2937 !important;
+  caret-color: #1f2937 !important;
+  border: none !important;
+  outline: none !important;
+  ring: 2px solid #3b82f6 !important;
 }
 
-textarea[placeholder*="travel"]::placeholder {
+.travel-input-container textarea::placeholder,
+.travel-input-container [data-slot="textarea"]::placeholder,
+.travel-textarea::placeholder {
   color: #6b7280 !important;
 }
 
-/* Override any competing textarea styles */
+/* Ultra-specific overrides */
+textarea[placeholder*="travel"] {
+  background: white !important;
+  background-color: white !important;
+  color: #1f2937 !important;
+  caret-color: #1f2937 !important;
+}
+
+/* Override any AI SDK or shadcn styles */
 [data-slot="textarea"] {
-  background-color: #f9fafb !important;
+  background: white !important;
+  background-color: white !important;
   color: #1f2937 !important;
 }
 
-/* Ensure proper text visibility in light theme */
-.light textarea,
-html:not(.dark) textarea {
-  background-color: #f9fafb !important;
+/* Nuclear option - override everything */
+* textarea {
+  background: white !important;
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+/* System-level overrides */
+html textarea,
+body textarea,
+div textarea {
+  background: white !important;
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+/* Framework overrides */
+.bg-input,
+.bg-background,
+textarea.bg-input,
+textarea.bg-background {
+  background: white !important;
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+/* Data attribute overrides */
+[data-travel-input="true"],
+textarea[data-travel-input="true"] {
+  background: white !important;
+  background-color: white !important;
   color: #1f2937 !important;
   caret-color: #1f2937 !important;
+}
+
+/* Final nuclear option - catch any remaining cases */
+:root textarea,
+html * textarea {
+  background: white !important;
+  background-color: white !important;
+  color: #1f2937 !important;
 }
