@@ -54,15 +54,6 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [limitedMessages, isLoading]);
 
-  // Force textarea styling after mount
-  useEffect(() => {
-    const textarea = document.querySelector('textarea[name="message"]') as HTMLTextAreaElement;
-    if (textarea) {
-      textarea.style.setProperty('background-color', 'rgba(255, 255, 255, 0.3)', 'important');
-      textarea.style.setProperty('color', 'white', 'important');
-      textarea.style.setProperty('caret-color', 'white', 'important');
-    }
-  }, []);
 
   const handleSubmit = async (
     message: { text?: string; files?: any[] },
@@ -251,13 +242,6 @@ export default function Home() {
                   <PromptInputBody>
                     <PromptInputTextarea
                       placeholder="Tell me about your travel plans..."
-                      className="travel-textarea"
-                      style={{
-                        backgroundColor: 'white',
-                        color: '#1f2937',
-                        caretColor: '#1f2937',
-                        border: 'none'
-                      } as React.CSSProperties}
                     />
                     <PromptInputToolbar className="border-t border-gray-200 bg-white">
                       <div />

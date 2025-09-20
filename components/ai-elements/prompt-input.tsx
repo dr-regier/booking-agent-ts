@@ -434,7 +434,7 @@ export const PromptInput = ({
       />
       <form
         className={cn(
-          "w-full divide-y overflow-hidden rounded-xl border bg-background shadow-sm",
+          "w-full divide-y overflow-hidden rounded-xl border bg-white shadow-sm",
           className
         )}
         onSubmit={handleSubmit}
@@ -486,7 +486,7 @@ export const PromptInputTextarea = ({
     <Textarea
       className={cn(
         "w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0",
-        "field-sizing-content bg-input",
+        "field-sizing-content bg-white text-gray-800",
         "max-h-48 min-h-16",
         "focus-visible:ring-0",
         className
