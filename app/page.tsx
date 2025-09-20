@@ -141,11 +141,11 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-blue-100 flex max-w-7xl mx-auto gap-6 p-6 animate-in fade-in duration-700">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-blue-100 flex max-w-7xl mx-auto gap-4 p-4 animate-in fade-in duration-700">
       {/* Main chat area */}
       <div className="flex-1 flex flex-col h-full bg-white/95 rounded-3xl shadow-2xl border border-gray-200/50 animate-in slide-in-from-left duration-500 delay-100">
         {/* Enhanced Travel-Themed Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-teal-500 border-b border-blue-500/20 p-6 flex items-center justify-between flex-shrink-0 rounded-t-3xl relative overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-teal-500 border-b border-blue-500/20 p-4 flex items-center justify-between flex-shrink-0 rounded-t-3xl relative overflow-hidden">
           {/* Animated Background Elements */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-4 left-20 animate-float">
@@ -160,10 +160,10 @@ export default function Home() {
           </div>
 
           <div className="relative z-10">
-            <h1 className="text-2xl font-bold text-white drop-shadow-lg transition-all duration-300 hover:text-blue-100 cursor-default mb-1">
+            <h1 className="text-xl font-bold text-white drop-shadow-lg transition-all duration-300 hover:text-blue-100 cursor-default">
               Travel Booking Assistant
             </h1>
-            <p className="text-blue-100 text-sm font-medium">
+            <p className="text-blue-100 text-xs font-medium mt-0.5">
               {getTimeBasedGreeting()}
             </p>
           </div>
@@ -173,7 +173,7 @@ export default function Home() {
         {/* Chat content container with fixed height */}
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto px-4 py-2 space-y-4">
+            <div className="max-w-4xl mx-auto px-4 py-2 space-y-3">
               {/* Show search results if they exist */}
               {searchResults.length > 0 ? (
                 <SearchResults
@@ -270,7 +270,7 @@ export default function Home() {
       </div>
 
       {/* Travel summary sidebar - fixed height with scroll */}
-      <div className="w-80 h-full bg-white/95 rounded-3xl shadow-2xl border border-gray-200/50 p-6 space-y-6 overflow-y-auto animate-in slide-in-from-right duration-500 delay-200">
+      <div className="w-72 h-full bg-white/95 rounded-3xl shadow-2xl border border-gray-200/50 p-4 space-y-4 overflow-y-auto animate-in slide-in-from-right duration-500 delay-200">
         <div className="animate-in fade-in duration-500 delay-300">
           <TravelSummary criteria={travelCriteria} />
         </div>

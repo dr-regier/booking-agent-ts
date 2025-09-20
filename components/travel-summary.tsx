@@ -28,17 +28,17 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
 
   if (!hasAnyCriteria) {
     return (
-      <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-200/50 p-6 transition-all duration-200 hover:shadow-2xl">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-blue-600" />
+      <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-200/50 p-4 transition-all duration-200 hover:shadow-2xl">
+        <div className="space-y-3">
+          <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-blue-600" />
             Travel Summary
           </h3>
-          <div className="space-y-3">
-            <p className="text-sm text-gray-600">
+          <div className="space-y-2">
+            <p className="text-xs text-gray-600">
               Start chatting to build your travel criteria
             </p>
-            <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 p-3 rounded-xl border border-amber-200">
+            <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
               <AlertTriangle className="h-3 w-3" />
               <span>Start by telling me your destination</span>
             </div>
@@ -49,27 +49,27 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
   }
 
   return (
-    <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-200/50 p-6 transition-all duration-200 hover:shadow-2xl">
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-blue-600" />
+    <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-200/50 p-4 transition-all duration-200 hover:shadow-2xl">
+      <div className="space-y-3">
+        <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-blue-600" />
           Travel Summary
         </h3>
-        <div className="space-y-4">
+        <div className="space-y-3">
         {criteria.destination && (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200 transition-all duration-200 hover:bg-blue-100">
-            <MapPin className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-gray-800">{criteria.destination}</span>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50 border border-blue-200 transition-all duration-200 hover:bg-blue-100">
+            <MapPin className="h-3 w-3 text-blue-600" />
+            <span className="text-xs font-medium text-gray-800">{criteria.destination}</span>
           </div>
         )}
 
         {(criteria.checkIn || criteria.checkOut) && (
-          <div className="p-3 rounded-xl bg-teal-50 border border-teal-200 space-y-2 transition-all duration-200 hover:bg-teal-100">
+          <div className="p-2 rounded-lg bg-teal-50 border border-teal-200 space-y-1 transition-all duration-200 hover:bg-teal-100">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-teal-600" />
-              <span className="text-sm font-medium text-gray-800">Dates</span>
+              <Calendar className="h-3 w-3 text-teal-600" />
+              <span className="text-xs font-medium text-gray-800">Dates</span>
             </div>
-            <div className="ml-6 text-sm text-gray-700 space-y-1">
+            <div className="ml-5 text-xs text-gray-700 space-y-0.5">
               {criteria.checkIn && <div>Check-in: {criteria.checkIn}</div>}
               {criteria.checkOut && <div>Check-out: {criteria.checkOut}</div>}
             </div>
@@ -77,21 +77,21 @@ export function TravelSummary({ criteria }: TravelSummaryProps) {
         )}
 
         {criteria.guests && (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-indigo-50 border border-indigo-200 transition-all duration-200 hover:bg-indigo-100">
-            <Users className="h-4 w-4 text-indigo-600" />
-            <span className="text-sm text-gray-800">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-indigo-50 border border-indigo-200 transition-all duration-200 hover:bg-indigo-100">
+            <Users className="h-3 w-3 text-indigo-600" />
+            <span className="text-xs text-gray-800">
               {criteria.guests} guest{criteria.guests > 1 ? 's' : ''}
             </span>
           </div>
         )}
 
         {criteria.budget && (
-          <div className="p-3 rounded-xl bg-green-50 border border-green-200 space-y-2 transition-all duration-200 hover:bg-green-100">
+          <div className="p-2 rounded-lg bg-green-50 border border-green-200 space-y-1 transition-all duration-200 hover:bg-green-100">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-gray-800">Budget</span>
+              <DollarSign className="h-3 w-3 text-green-600" />
+              <span className="text-xs font-medium text-gray-800">Budget</span>
             </div>
-            <div className="ml-6 text-sm text-gray-700">
+            <div className="ml-5 text-xs text-gray-700">
               {criteria.budget.min && criteria.budget.max ? (
                 `${criteria.budget.currency || '$'}${criteria.budget.min} - ${criteria.budget.currency || '$'}${criteria.budget.max}`
               ) : criteria.budget.max ? (

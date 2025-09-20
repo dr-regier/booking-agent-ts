@@ -141,64 +141,64 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
       </TooltipProvider>
 
       {/* Validation Progress */}
-      <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-200/50 p-6 transition-all duration-200 hover:shadow-2xl">
-        <div className="pb-4">
-          <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+      <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-200/50 p-4 transition-all duration-200 hover:shadow-2xl">
+        <div className="pb-3">
+          <h3 className="text-xs font-semibold text-gray-800 flex items-center gap-2">
             {validation.isValid ? (
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <CheckCircle2 className="h-3 w-3 text-green-500" />
             ) : (
-              <AlertCircle className="h-4 w-4 text-amber-500" />
+              <AlertCircle className="h-3 w-3 text-amber-500" />
             )}
             Search Requirements ({validationProgress.completed}/{validationProgress.total})
           </h3>
         </div>
-        <div className="space-y-3">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
+        <div className="space-y-2">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
               {validationProgress.requirements.destination ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-3 w-3 text-green-500" />
               ) : (
-                <Circle className="h-4 w-4 text-gray-400" />
+                <Circle className="h-3 w-3 text-gray-400" />
               )}
               <span className={validationProgress.requirements.destination ? "text-green-600" : "text-gray-500"}>
                 Destination {criteria.destination ? `(${criteria.destination})` : ''}
               </span>
             </div>
-            <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
+            <div className="flex items-center gap-2 text-xs p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
               {validationProgress.requirements.checkIn ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-3 w-3 text-green-500" />
               ) : (
-                <Circle className="h-4 w-4 text-gray-400" />
+                <Circle className="h-3 w-3 text-gray-400" />
               )}
               <span className={validationProgress.requirements.checkIn ? "text-green-600" : "text-gray-500"}>
                 Check-in Date {criteria.checkIn ? `(${criteria.checkIn})` : ''}
               </span>
             </div>
-            <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
+            <div className="flex items-center gap-2 text-xs p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
               {validationProgress.requirements.checkOut ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-3 w-3 text-green-500" />
               ) : (
-                <Circle className="h-4 w-4 text-gray-400" />
+                <Circle className="h-3 w-3 text-gray-400" />
               )}
               <span className={validationProgress.requirements.checkOut ? "text-green-600" : "text-gray-500"}>
                 Check-out Date {criteria.checkOut ? `(${criteria.checkOut})` : ''}
               </span>
             </div>
-            <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
+            <div className="flex items-center gap-2 text-xs p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
               {validationProgress.requirements.guests ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-3 w-3 text-green-500" />
               ) : (
-                <Circle className="h-4 w-4 text-gray-400" />
+                <Circle className="h-3 w-3 text-gray-400" />
               )}
               <span className={validationProgress.requirements.guests ? "text-green-600" : "text-gray-500"}>
                 Number of Guests {criteria.guests ? `(${criteria.guests})` : ''}
               </span>
             </div>
-            <div className="flex items-center gap-3 text-sm p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
+            <div className="flex items-center gap-2 text-xs p-2 rounded-lg bg-gray-50 border border-gray-200 transition-all duration-200 hover:bg-gray-100">
               {validationProgress.requirements.budget ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-3 w-3 text-green-500" />
               ) : (
-                <Circle className="h-4 w-4 text-gray-400" />
+                <Circle className="h-3 w-3 text-gray-400" />
               )}
               <span className={validationProgress.requirements.budget ? "text-green-600" : "text-gray-500"}>
                 Budget Per Night {criteria.budget?.max ? `(Up to $${criteria.budget.max})` : ''}
@@ -208,9 +208,9 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
 
           {/* Show validation errors */}
           {validation.errors.length > 0 && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
               {validation.errors.map((error, index) => (
-                <div key={index} className="text-sm text-red-700 flex items-center gap-2">
+                <div key={index} className="text-xs text-red-700 flex items-center gap-2">
                   <AlertCircle className="h-3 w-3" />
                   {error}
                 </div>
@@ -219,12 +219,12 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
           )}
 
           {/* Progress Bar */}
-          <div className="mt-4">
-            <div className="flex items-center justify-between mb-2">
+          <div className="mt-2">
+            <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-gray-600">Progress</span>
               <span className="text-xs text-gray-600">{Math.round(validationProgress.percentage)}%</span>
             </div>
-            <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-blue-500 via-teal-500 to-green-500 transition-all duration-500 shadow-sm"
                 style={{ width: `${validationProgress.percentage}%` }}
@@ -233,7 +233,7 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
           </div>
 
           {!validation.isValid && (
-            <p className="text-xs text-gray-600 mt-3 p-2 rounded-lg bg-gray-50">
+            <p className="text-xs text-gray-600 mt-2 p-2 rounded-lg bg-gray-50">
               {validation.message}
             </p>
           )}
@@ -249,15 +249,15 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
       )}
 
       {progress.length > 0 && (
-        <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-200/50 p-6 transition-all duration-200 hover:shadow-2xl">
-          <div className="pb-4">
-            <h3 className="text-sm font-semibold text-gray-800">Detailed Progress</h3>
+        <div className="bg-white/90 rounded-2xl shadow-xl border border-gray-200/50 p-4 transition-all duration-200 hover:shadow-2xl">
+          <div className="pb-3">
+            <h3 className="text-xs font-semibold text-gray-800">Detailed Progress</h3>
           </div>
-          <div className="space-y-3 max-h-48 overflow-y-auto">
+          <div className="space-y-2 max-h-32 overflow-y-auto">
             {progress.map((message, index) => (
-              <div key={index} className="text-sm flex items-center gap-3 p-2 rounded-lg bg-gray-50 border border-gray-200">
+              <div key={index} className="text-xs flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200">
                 {!message.includes('❌') && isSearching && index === progress.length - 1 && (
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-sm" />
+                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-sm" />
                 )}
                 <span className={message.includes('❌') ? 'text-red-600' : 'text-gray-700'}>
                   {message}
