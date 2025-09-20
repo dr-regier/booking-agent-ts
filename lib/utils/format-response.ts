@@ -1,11 +1,37 @@
 /**
  * Formats AI responses for better readability in the chat interface
+ * Filters out technical details to keep responses conversational
  */
 export function formatAIResponse(text: string): string {
   if (!text) return text;
 
+  // Filter out technical patterns that shouldn't appear in chat
+  const technicalPatterns = [
+    /\*\*Destination:\*\*.*$/gm,
+    /\*\*Check-in date:\*\*.*$/gm,
+    /\*\*Check-out date:\*\*.*$/gm,
+    /\*\*Number of guests:\*\*.*$/gm,
+    /\*\*Budget:\*\*.*$/gm,
+    /\d+\.\s+\*\*Destination:\*\*.*$/gm,
+    /\d+\.\s+\*\*Check-in date:\*\*.*$/gm,
+    /\d+\.\s+\*\*Check-out date:\*\*.*$/gm,
+    /\d+\.\s+\*\*Number of guests:\*\*.*$/gm,
+    /\d+\.\s+\*\*Budget:\*\*.*$/gm,
+    /Based on your requirements.*$/gm,
+    /Extracted criteria:.*$/gm,
+    /Search parameters:.*$/gm,
+  ];
+
+  let filteredText = text;
+  for (const pattern of technicalPatterns) {
+    filteredText = filteredText.replace(pattern, '');
+  }
+
+  // Clean up extra whitespace and empty lines
+  filteredText = filteredText.replace(/\n\s*\n\s*\n/g, '\n\n').trim();
+
   // Split into paragraphs first (double newlines)
-  const paragraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
+  const paragraphs = filteredText.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
   const formattedParagraphs: string[] = [];
 
   for (const paragraph of paragraphs) {
