@@ -21,7 +21,8 @@ import {
 import type { UIMessage } from "ai";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TravelSummary } from "@/components/travel-summary";
-import { SearchAccommodations, SearchResults } from "@/components/search-accommodations";
+import { SearchAccommodations } from "@/components/search-accommodations";
+import { SearchResults } from "@/components/search-results";
 import type { TravelCriteria } from "@/lib/types/travel";
 import { extractTravelCriteria, mergeTravelCriteria } from "@/lib/utils/travel-extractor";
 import { extractEnhancedCriteria, mergeEnhancedCriteria } from "@/lib/utils/enhanced-extractor";
@@ -64,7 +65,7 @@ export default function Home() {
     const userMessage: UIMessage = {
       id: Date.now().toString(),
       role: "user",
-      content: message.text,
+      parts: [{ type: "text", text: message.text }],
     };
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
@@ -92,7 +93,7 @@ export default function Home() {
           message: message.text,
           messageHistory: limitedMessages.map(msg => ({
             role: msg.role,
-            content: msg.content
+            content: msg.parts.find(part => part.type === 'text')?.text || ''
           }))
         }),
         signal: controller.signal,
@@ -105,7 +106,7 @@ export default function Home() {
         const assistantMessage: UIMessage = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: formatAIResponse(data.response),
+          parts: [{ type: "text", text: formatAIResponse(data.response) }],
         };
         setLastMessageId(assistantMessage.id);
         setMessages((prev) => [...prev, assistantMessage]);
@@ -123,7 +124,7 @@ export default function Home() {
       const errorMessage: UIMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: errorContent,
+        parts: [{ type: "text", text: errorContent }],
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -173,61 +174,71 @@ export default function Home() {
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-4xl mx-auto px-4 py-2 space-y-4">
-              {limitedMessages.length === 0 ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 space-y-4 max-w-md mx-auto">
-                    <div className="text-3xl text-center">🌍</div>
-                    <h3 className="font-semibold text-lg text-gray-800 text-center">Welcome to your Travel Assistant!</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed text-center">
-                      I'm here to help you discover and book the perfect accommodations for your journey.
-                      Share your destination, dates, number of guests, and budget to get started.
-                    </p>
-                    <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                        Personalized Search
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
-                        AI-Powered Recommendations
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              {/* Show search results if they exist */}
+              {searchResults.length > 0 ? (
+                <SearchResults
+                  results={searchResults}
+                  onClear={() => setSearchResults([])}
+                />
               ) : (
-                limitedMessages.map((message, index) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className={`max-w-2xl rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
-                      message.role === 'user'
-                        ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
-                        : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
-                    } p-4 group`}>
-                      <FormattedMessage
-                        content={message.content}
-                        role={message.role}
-                        isNew={message.role === 'assistant' && message.id === lastMessageId}
-                      />
-                    </div>
-                  </div>
-                ))
-              )}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="max-w-2xl bg-white/95 border-gray-200 text-gray-800 rounded-2xl shadow-lg border p-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-pulse text-blue-600">Thinking...</div>
-                      <div className="flex space-x-1">
-                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
-                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                <>
+                  {limitedMessages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 space-y-4 max-w-md mx-auto">
+                        <div className="text-3xl text-center">🌍</div>
+                        <h3 className="font-semibold text-lg text-gray-800 text-center">Welcome to your Travel Assistant!</h3>
+                        <p className="text-gray-600 text-sm leading-relaxed text-center">
+                          I'm here to help you discover and book the perfect accommodations for your journey.
+                          Share your destination, dates, number of guests, and budget to get started.
+                        </p>
+                        <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                            Personalized Search
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
+                            AI-Powered Recommendations
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  ) : (
+                    limitedMessages.map((message, index) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
+                        style={{ animationDelay: `${index * 100}ms` }}
+                      >
+                        <div className={`max-w-2xl rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                          message.role === 'user'
+                            ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
+                            : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
+                        } p-4 group`}>
+                          <FormattedMessage
+                            content={message.parts.find(part => part.type === 'text')?.text || ''}
+                            role={message.role}
+                            isNew={message.role === 'assistant' && message.id === lastMessageId}
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="max-w-2xl bg-white/95 border-gray-200 text-gray-800 rounded-2xl shadow-lg border p-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="animate-pulse text-blue-600">Thinking...</div>
+                          <div className="flex space-x-1">
+                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
+                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
               {/* Invisible element to scroll to */}
               <div ref={messagesEndRef} />
@@ -271,12 +282,6 @@ export default function Home() {
           />
         </div>
 
-        <div className="animate-in fade-in duration-500 delay-500">
-          <SearchResults
-            results={searchResults}
-            onClear={() => setSearchResults([])}
-          />
-        </div>
       </div>
     </div>
   );

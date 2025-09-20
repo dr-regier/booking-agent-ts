@@ -149,7 +149,7 @@ Be objective and consider both strengths and weaknesses. Higher scores (80-100) 
       const score = scoreMatch ? Math.min(100, Math.max(0, parseInt(scoreMatch[1]))) : 50;
 
       // Extract reasoning
-      const reasoningMatch = response.match(/REASONING:\s*(.+)/is);
+      const reasoningMatch = response.match(/REASONING:\s*(.+)/i);
       const reasoning = reasoningMatch ? reasoningMatch[1].trim() : 'No reasoning provided';
 
       return {

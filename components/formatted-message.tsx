@@ -3,7 +3,7 @@ import { TypewriterText } from './typewriter-text';
 
 interface FormattedMessageProps {
   content: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   isNew?: boolean;
 }
 
