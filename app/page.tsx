@@ -248,21 +248,26 @@ export default function Home() {
           {/* Input area pinned to bottom */}
           <div className="flex-shrink-0 bg-white border-t border-gray-200 rounded-b-3xl">
             <div className="max-w-4xl mx-auto p-4">
-              <div className="bg-white rounded-2xl shadow-lg border-2 border-gray-300 p-3 transition-all duration-200 hover:shadow-xl travel-input-container">
-                <PromptInput onSubmit={handleSubmit}>
-                  <PromptInputBody>
+              <div className="flex items-center bg-white rounded-2xl shadow-lg border-2 border-gray-300 transition-all duration-200 hover:shadow-xl travel-input-container pl-4 pr-2 py-2">
+                <PromptInput onSubmit={handleSubmit} className="flex-1 border-none shadow-none rounded-none bg-transparent">
+                  <PromptInputBody className="flex-row items-center">
                     <PromptInputTextarea
                       placeholder="Tell me about your travel plans..."
+                      className="flex-1 min-h-0 h-10 resize-none border-none p-0 shadow-none outline-none ring-0 focus-visible:ring-0 bg-transparent"
                     />
-                    <PromptInputToolbar className="border-t border-gray-200 bg-white">
-                      <div />
-                      <PromptInputSubmit
-                        status={isLoading ? "submitted" : undefined}
-                        className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-                      />
-                    </PromptInputToolbar>
                   </PromptInputBody>
                 </PromptInput>
+                <PromptInputSubmit
+                  form={undefined}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const form = e.currentTarget.closest('form') || document.querySelector('form');
+                    if (form) form.requestSubmit();
+                  }}
+                  status={isLoading ? "submitted" : undefined}
+                  className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex-shrink-0 ml-2"
+                  size="icon"
+                />
               </div>
             </div>
           </div>
