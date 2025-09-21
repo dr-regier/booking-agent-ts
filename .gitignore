@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# chat summary files and prompts
+Prompts/
+Chat-Summaries/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
