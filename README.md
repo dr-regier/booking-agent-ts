@@ -4,7 +4,7 @@ A modern AI-powered chat application built with Next.js 15, TypeScript, AI SDK 5
 
 ## Features
 
-- **Clean Chat Interface** with GPT-4 integration
+- **Clean Chat Interface** with GPT-4o-mini integration
 - **AI Elements Components** (Conversation, Message, PromptInput)
 - **shadcn/ui Design System** for modern, accessible UI
 - **TypeScript Ready** with full type safety
@@ -35,7 +35,28 @@ echo "OPENAI_API_KEY=your_openai_api_key_here" > .env.local
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to start chatting with the AI assistant.
+Open [http://localhost:3001](http://localhost:3001) to start chatting with the AI assistant.
+
+## Testing Modes
+
+This application supports two modes for accommodation search:
+
+### Mock Mode (Default)
+- Uses sample accommodation data for demonstration
+- No real booking sites are accessed
+- Perfect for testing and portfolio showcasing
+- **Default behavior** - no additional setup required
+
+### Production Mode
+- Uses real Playwright automation to search actual booking sites
+- Provides live accommodation data from Booking.com, Airbnb, etc.
+- **To enable:** Add this line to your `.env.local` file:
+```bash
+USE_REAL_BOOKING_SEARCH=true
+```
+Then restart the development server with `pnpm dev`.
+
+**Note:** Production mode requires additional dependencies and may have longer response times due to real-time web scraping.
 
 ## Repository
 - **GitHub**: [dr-regier/booking-agent-ts](https://github.com/dr-regier/booking-agent-ts)
