@@ -243,11 +243,16 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     return count;
   };
 
-  for (const pattern of guestPatterns) {
+  // Define which patterns are family patterns (by index since pattern.source has escape sequences)
+  const familyPatternIndices = new Set([9, 10, 11, 12, 13, 14, 15]); // Last 7 patterns in the array
+
+  for (let i = 0; i < guestPatterns.length; i++) {
+    const pattern = guestPatterns[i];
     const matches = Array.from(lowerMessage.matchAll(pattern));
+
     for (const match of matches) {
-      // Check if this is a family relationship pattern
-      if (pattern.source.includes('wife|husband|spouse|partner|child|children|couple|two\s+of\s+us|both\s+of\s+us|we|us')) {
+      // Check if this is a family relationship pattern by index
+      if (familyPatternIndices.has(i)) {
         const familyCount = parseFamilyCount(match[0]);
         if (familyCount > 0 && familyCount <= 20) {
           extracted.guests = familyCount;

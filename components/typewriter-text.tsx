@@ -19,13 +19,15 @@ export function TypewriterText({
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
+    // Store the original text to prevent changes during animation
+    const originalText = text;
     let index = 0;
     setDisplayText('');
     setIsComplete(false);
 
     const timer = setInterval(() => {
-      if (index < text.length) {
-        setDisplayText(prev => prev + text.charAt(index));
+      if (index < originalText.length) {
+        setDisplayText(originalText.substring(0, index + 1));
         index++;
       } else {
         setIsComplete(true);
