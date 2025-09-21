@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Bookings Agent",
+  title: "AI Booking Agent",
   description: "Built by Ryan Regier",
 };
 
