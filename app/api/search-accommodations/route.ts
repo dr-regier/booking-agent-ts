@@ -26,7 +26,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.8,
       description: 'Luxury hotel in the heart of Paris with stunning views of Place de la Concorde',
       amenities: ['wifi', 'spa', 'concierge', 'restaurant'],
-      location: 'Place de la Concorde, Paris'
+      location: 'Place de la Concorde, Paris',
+      matchScore: 92
     },
     {
       id: '2',
@@ -35,7 +36,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.5,
       description: 'Charming boutique hotel in historic Le Marais district',
       amenities: ['wifi', 'breakfast', 'air conditioning'],
-      location: 'Le Marais, Paris'
+      location: 'Le Marais, Paris',
+      matchScore: 87
     },
     {
       id: '3',
@@ -44,7 +46,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.3,
       description: 'Spacious 2-bedroom apartment with kitchen, 5 minutes from Louvre',
       amenities: ['wifi', 'kitchen', 'family-friendly'],
-      location: '1st Arrondissement, Paris'
+      location: '1st Arrondissement, Paris',
+      matchScore: 95
     }
   ],
   'new york': [
@@ -55,7 +58,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.7,
       description: 'Iconic luxury hotel overlooking Central Park',
       amenities: ['spa', 'restaurant', 'concierge', 'gym'],
-      location: 'Fifth Avenue, New York'
+      location: 'Fifth Avenue, New York',
+      matchScore: 89
     },
     {
       id: '5',
@@ -64,7 +68,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.4,
       description: 'Stylish loft with Manhattan skyline views',
       amenities: ['wifi', 'kitchen', 'balcony'],
-      location: 'Brooklyn Heights, New York'
+      location: 'Brooklyn Heights, New York',
+      matchScore: 93
     }
   ],
   'tokyo': [
@@ -75,7 +80,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.9,
       description: 'Ultra-modern luxury hotel with city views and world-class service',
       amenities: ['spa', 'pool', 'restaurant', 'concierge'],
-      location: 'Shinjuku, Tokyo'
+      location: 'Shinjuku, Tokyo',
+      matchScore: 84
     },
     {
       id: '7',
@@ -84,7 +90,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.6,
       description: 'Authentic Japanese inn with tatami rooms and onsen',
       amenities: ['traditional bath', 'restaurant', 'garden'],
-      location: 'Asakusa, Tokyo'
+      location: 'Asakusa, Tokyo',
+      matchScore: 91
     }
   ],
   'default': [
@@ -95,7 +102,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.2,
       description: 'Comfortable hotel with modern amenities in city center',
       amenities: ['wifi', 'restaurant', 'parking'],
-      location: 'City Center'
+      location: 'City Center',
+      matchScore: 78
     },
     {
       id: '9',
@@ -104,7 +112,8 @@ const mockAccommodations: Record<string, AccommodationResult[]> = {
       rating: 4.1,
       description: 'Well-equipped apartment perfect for travelers',
       amenities: ['wifi', 'kitchen', 'parking'],
-      location: 'Downtown'
+      location: 'Downtown',
+      matchScore: 82
     }
   ]
 };
@@ -200,6 +209,9 @@ export async function POST(request: NextRequest) {
             let accommodations = getAccommodationsForDestination(criteria.destination);
             accommodations = filterByBudget(accommodations, criteria.budget);
 
+            // Sort by AI match score (highest to lowest)
+            accommodations = accommodations.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({
               type: 'progress',
               message: `Analyzing ${accommodations.length} properties found...`
@@ -226,6 +238,12 @@ export async function POST(request: NextRequest) {
               type: 'results',
               accommodations,
               searchCriteria: criteria
+            })}\n\n`));
+
+            // Send final progress message with results count
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'progress',
+              message: `Search completed - ${accommodations.length} accommodation${accommodations.length !== 1 ? 's' : ''} found and ready to view!`
             })}\n\n`));
           }
 

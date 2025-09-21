@@ -187,6 +187,11 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     /(?:me|i|myself)(?:\s*,\s*|\s+and\s+)(?:my\s+)?(?:wife|husband|spouse|partner)(?:\s*,\s*|\s+and\s+)(?:(?:one|two|three|four|five)\s+)?(?:child|children|kid|kids|son|daughter|baby|babies)/gi,
     /(?:me|i|myself)(?:\s*,\s*|\s+and\s+)(?:my\s+)?(?:wife|husband|spouse|partner)/gi,
     /(?:me|i|myself)(?:\s*,\s*|\s+and\s+)(?:(?:one|two|three|four|five)\s+)?(?:child|children|kid|kids|son|daughter|baby|babies)/gi,
+    // Additional common family patterns
+    /(?:my\s+)?(?:wife|husband|spouse|partner)(?:\s*,\s*|\s+and\s+)(?:me|i|myself)/gi,
+    /(?:wife|husband|spouse|partner)(?:\s*,\s*|\s+and\s+)(?:me|i|myself)/gi,
+    /(?:we|us)\s+are\s+(?:a\s+)?(?:couple|married|going\s+together)/gi,
+    /(?:couple|two\s+of\s+us|both\s+of\s+us)/gi,
   ];
 
   // Helper function to convert word numbers to integers
@@ -202,6 +207,15 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
   const parseFamilyCount = (text: string): number => {
     let count = 0;
     const lowerText = text.toLowerCase();
+
+    // Handle simple couple patterns first
+    if (/\b(?:couple|two\s+of\s+us|both\s+of\s+us)\b/.test(lowerText)) {
+      return 2;
+    }
+
+    if (/(?:we|us)\s+are\s+(?:a\s+)?(?:couple|married|going\s+together)/.test(lowerText)) {
+      return 2;
+    }
 
     // Count "me/I/myself" (always 1)
     if (/\b(?:me|i|myself)\b/.test(lowerText)) {
@@ -233,7 +247,7 @@ export function extractTravelCriteria(message: string): ExtractedCriteria {
     const matches = Array.from(lowerMessage.matchAll(pattern));
     for (const match of matches) {
       // Check if this is a family relationship pattern
-      if (pattern.source.includes('me|i|myself') && pattern.source.includes('wife|husband|spouse|partner|child|children')) {
+      if (pattern.source.includes('wife|husband|spouse|partner|child|children|couple|two\s+of\s+us|both\s+of\s+us|we|us')) {
         const familyCount = parseFamilyCount(match[0]);
         if (familyCount > 0 && familyCount <= 20) {
           extracted.guests = familyCount;

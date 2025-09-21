@@ -11,6 +11,7 @@ interface AccommodationResult {
   description: string;
   amenities: string[];
   location: string;
+  matchScore?: number;
 }
 
 interface SearchResultsProps {
@@ -139,7 +140,7 @@ export function SearchResults({ results, onClear }: SearchResultsProps) {
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="text-base font-bold text-green-600">95%</div>
+                      <div className="text-base font-bold text-green-600">{accommodation.matchScore || 95}%</div>
                       <div className="text-xs text-gray-600">Match</div>
                     </div>
                   </div>

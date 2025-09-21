@@ -88,7 +88,6 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
                 setCurrentProgressStep(2);
               } else if (data.type === 'complete') {
                 setCurrentProgressStep(3);
-                setProgress(prev => [...prev, 'Search completed successfully!']);
                 setIsSearching(false);
               } else if (data.type === 'error') {
                 setProgress(prev => [...prev, `❌ ${data.message}`]);
@@ -255,23 +254,32 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
             <h3 className="text-xs font-semibold text-gray-800">Detailed Progress</h3>
           </div>
           <div className="space-y-2 max-h-32 overflow-y-auto">
-            {progress.map((message, index) => (
-              <div key={index} className="text-xs flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200">
-                {!message.includes('❌') && !message.includes('completed successfully') && isSearching && index === progress.length - 1 && (
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-sm" />
-                )}
-                {message.includes('completed successfully') && (
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-sm" />
-                )}
-                <span className={
-                  message.includes('❌') ? 'text-red-600' :
-                  message.includes('completed successfully') ? 'text-green-600' :
-                  'text-gray-700'
-                }>
-                  {message}
-                </span>
-              </div>
-            ))}
+            {progress.map((message, index) => {
+              const isError = message.includes('❌');
+              const isCompleted = message.includes('Search completed');
+              const isInProgress = !isError && !isCompleted && isSearching && index === progress.length - 1;
+
+              return (
+                <div key={index} className="text-xs flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200">
+                  {isInProgress && (
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-sm" />
+                  )}
+                  {isCompleted && (
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-sm" />
+                  )}
+                  {!isInProgress && !isCompleted && !isError && (
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full shadow-sm" />
+                  )}
+                  <span className={
+                    isError ? 'text-red-600' :
+                    isCompleted ? 'text-green-600 font-medium' :
+                    'text-gray-700'
+                  }>
+                    {message}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

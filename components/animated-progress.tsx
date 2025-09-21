@@ -45,7 +45,7 @@ export function AnimatedProgress({ steps, currentStep, isActive }: AnimatedProgr
         <div
           className="absolute left-6 top-6 w-0.5 bg-gradient-to-b from-blue-400 via-purple-500 to-green-400 transition-all duration-1000 ease-out shadow-lg"
           style={{
-            height: `${Math.max(0, (animatedCurrentStep / Math.max(1, steps.length - 1)) * 100)}%`
+            height: `${animatedCurrentStep >= steps.length - 1 ? 100 : Math.max(0, (animatedCurrentStep / Math.max(1, steps.length - 1)) * 100)}%`
           }}
         />
 
@@ -122,13 +122,13 @@ export function AnimatedProgress({ steps, currentStep, isActive }: AnimatedProgr
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-white/70">Overall Progress</span>
             <span className="text-xs text-white/70">
-              {!isActive && animatedCurrentStep >= steps.length ? '100' : Math.round((animatedCurrentStep / Math.max(1, steps.length)) * 100)}%
+              {animatedCurrentStep >= steps.length - 1 ? '100' : Math.round(((animatedCurrentStep + 1) / steps.length) * 100)}%
             </span>
           </div>
           <div className="h-2 bg-white/20 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-blue-400 via-purple-500 to-green-400 transition-all duration-1000 ease-out shadow-lg"
-              style={{ width: `${!isActive && animatedCurrentStep >= steps.length ? 100 : (animatedCurrentStep / Math.max(1, steps.length)) * 100}%` }}
+              style={{ width: `${animatedCurrentStep >= steps.length - 1 ? 100 : ((animatedCurrentStep + 1) / steps.length) * 100}%` }}
             />
           </div>
         </div>
