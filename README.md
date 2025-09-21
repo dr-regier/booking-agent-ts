@@ -108,3 +108,4 @@ This project demonstrates proficiency in:
 
 - **GitHub Repository**: [dr-regier/booking-agent-ts](https://github.com/dr-regier/booking-agent-ts)
 - **Technologies**: Next.js 15, TypeScript, AI SDK 5, Playwright, OpenAI GPT-4o-mini
+- **YouTube Demo** https://www.youtube.com/watch?v=etMSey1v4es
