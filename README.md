@@ -1,15 +1,25 @@
-# Booking Agent - TypeScript Next.js AI Chat Application
+# AI-Powered Travel Booking Assistant
 
-A modern AI-powered chat application built with Next.js 15, TypeScript, AI SDK 5, shadcn/ui, and AI Elements for intelligent booking assistance and travel planning.
+An intelligent travel booking assistant that combines conversational AI with automated web scraping to provide personalized accommodation recommendations. Built with Next.js 15, TypeScript, and advanced browser automation.
 
-## Features
+## 🚀 Key Features
 
-- **Clean Chat Interface** with GPT-4o-mini integration
-- **AI Elements Components** (Conversation, Message, PromptInput)
-- **shadcn/ui Design System** for modern, accessible UI
-- **TypeScript Ready** with full type safety
-- **Responsive Design** optimized for all devices
-- **Real-time AI Responses** for booking assistance
+### **Conversational AI Interface**
+- Natural language processing for travel criteria extraction
+- Context-aware responses using OpenAI's GPT-4o-mini
+- Real-time typewriter animations for enhanced UX
+- Intelligent parsing of complex travel requests
+
+### **Automated Web Scraping**
+- **Playwright automation** for real-time data collection
+- **Anti-detection mechanisms** with human-like behavior simulation
+- **Multi-platform integration**: Booking.com, Airbnb, Hotels.com
+- **Intelligent retry logic** for handling rate limits
+
+### **Dual-Mode Architecture**
+- **Mock Mode**: Sample data for safe demonstration
+- **Production Mode**: Live web scraping with real accommodation data
+- **Environment-based switching** for seamless transitions
 
 ## Quick Start
 
@@ -58,14 +68,43 @@ Then restart the development server with `pnpm dev`.
 
 **Note:** Production mode requires additional dependencies and may have longer response times due to real-time web scraping.
 
-## Repository
-- **GitHub**: [dr-regier/booking-agent-ts](https://github.com/dr-regier/booking-agent-ts)
+## 🛠️ Technical Stack
 
-## Resources
+### **Frontend & Framework**
+- **Next.js 15** with App Router and Turbopack
+- **TypeScript** for type safety and developer experience
+- **Tailwind CSS v4** for responsive, utility-first styling
+- **shadcn/ui** component system for consistent design
 
-- [Next.js 15](https://nextjs.org/) - React framework
-- [AI SDK 5](https://ai-sdk.dev/) - AI integration toolkit
-- [AI Elements](https://ai-sdk.dev/elements/overview) - Pre-built AI components
-- [shadcn/ui](https://ui.shadcn.com/) - Component library
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
-- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+### **AI & Automation**
+- **OpenAI GPT-4o-mini** for natural language processing
+- **AI SDK 5** for seamless AI integration
+- **Playwright** for advanced browser automation
+- **Anti-detection techniques** for ethical web scraping
+
+### **Development Tools**
+- **pnpm** for efficient package management
+- **ESLint & Prettier** for code quality
+- **Git** with feature branch workflows
+
+## 🎯 Project Highlights
+
+- **Advanced Web Scraping**: Human-like behavior simulation to avoid detection
+- **Real-time Progress Tracking**: Streaming updates during accommodation searches
+- **Intelligent Data Processing**: AI-powered property evaluation and ranking
+- **Production-Ready**: Comprehensive error handling and retry mechanisms
+- **Accessibility Compliant**: WCAG guidelines and screen reader support
+
+## 📊 Learning Outcomes
+
+This project demonstrates proficiency in:
+- Modern React ecosystem and Next.js best practices
+- AI/ML integration in production applications
+- Complex automation and web scraping techniques
+- User-centered design and accessibility standards
+- Full-stack TypeScript development
+
+## 🔗 Links
+
+- **GitHub Repository**: [dr-regier/booking-agent-ts](https://github.com/dr-regier/booking-agent-ts)
+- **Technologies**: Next.js 15, TypeScript, AI SDK 5, Playwright, OpenAI GPT-4o-mini
