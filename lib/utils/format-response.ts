@@ -5,6 +5,9 @@
 export function formatAIResponse(text: string): string {
   if (!text) return text;
 
+  // Store the original first character to prevent it from being lost
+  const originalFirstChar = text.charAt(0);
+
   // Filter out technical patterns that shouldn't appear in chat
   const technicalPatterns = [
     /\*\*Destination:\*\*.*$/gm,
@@ -87,7 +90,14 @@ export function formatAIResponse(text: string): string {
     }
   }
 
-  return formattedParagraphs.join('\n\n');
+  const result = formattedParagraphs.join('\n\n');
+
+  // Safeguard: If the result doesn't start with the original first character, restore it
+  if (result && originalFirstChar && !result.startsWith(originalFirstChar) && /[a-zA-Z]/.test(originalFirstChar)) {
+    return originalFirstChar + result;
+  }
+
+  return result;
 }
 
 /**
