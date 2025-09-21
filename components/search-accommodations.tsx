@@ -32,7 +32,7 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
     "Searching Accommodations",
     "Evaluating Properties",
     "AI Ranking Results",
-    "Search Complete"
+    "Results Ready"
   ];
 
   const validation = validateTravelCriteria(criteria);
@@ -88,7 +88,8 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
                 setCurrentProgressStep(2);
               } else if (data.type === 'complete') {
                 setCurrentProgressStep(3);
-                setTimeout(() => setIsSearching(false), 1000);
+                setProgress(prev => [...prev, 'Search completed successfully!']);
+                setIsSearching(false);
               } else if (data.type === 'error') {
                 setProgress(prev => [...prev, `❌ ${data.message}`]);
                 setIsSearching(false);
@@ -256,10 +257,17 @@ export function SearchAccommodations({ criteria, onSearchResults }: SearchProgre
           <div className="space-y-2 max-h-32 overflow-y-auto">
             {progress.map((message, index) => (
               <div key={index} className="text-xs flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200">
-                {!message.includes('❌') && isSearching && index === progress.length - 1 && (
+                {!message.includes('❌') && !message.includes('completed successfully') && isSearching && index === progress.length - 1 && (
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-sm" />
                 )}
-                <span className={message.includes('❌') ? 'text-red-600' : 'text-gray-700'}>
+                {message.includes('completed successfully') && (
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-sm" />
+                )}
+                <span className={
+                  message.includes('❌') ? 'text-red-600' :
+                  message.includes('completed successfully') ? 'text-green-600' :
+                  'text-gray-700'
+                }>
                   {message}
                 </span>
               </div>

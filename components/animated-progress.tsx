@@ -20,13 +20,13 @@ export function AnimatedProgress({ steps, currentStep, isActive }: AnimatedProgr
   const [animatedCurrentStep, setAnimatedCurrentStep] = useState(0);
 
   useEffect(() => {
-    if (isActive && currentStep > animatedCurrentStep) {
+    if (currentStep > animatedCurrentStep) {
       const timer = setTimeout(() => {
         setAnimatedCurrentStep(prev => Math.min(prev + 1, currentStep));
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, animatedCurrentStep, isActive]);
+  }, [currentStep, animatedCurrentStep]);
 
   if (!isActive && steps.length === 0) return null;
 
@@ -53,8 +53,9 @@ export function AnimatedProgress({ steps, currentStep, isActive }: AnimatedProgr
         <div className="space-y-6">
           {steps.map((step, index) => {
             const Icon = stepIcons[index] || Search;
-            const isCompleted = index < animatedCurrentStep;
-            const isCurrent = index === animatedCurrentStep;
+            const isCompleted = index < animatedCurrentStep || (!isActive && index === steps.length - 1 && animatedCurrentStep >= steps.length - 1);
+            const isCurrent = index === animatedCurrentStep && isActive && index < steps.length - 1;
+            const isFinalComplete = !isActive && index === steps.length - 1 && animatedCurrentStep >= steps.length - 1;
             const isUpcoming = index > animatedCurrentStep;
 
             return (
@@ -67,7 +68,7 @@ export function AnimatedProgress({ steps, currentStep, isActive }: AnimatedProgr
                 {/* Step circle */}
                 <div
                   className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
-                    isCompleted
+                    isCompleted || isFinalComplete
                       ? 'bg-gradient-to-r from-green-400 to-blue-500 shadow-lg shadow-green-400/50'
                       : isCurrent
                       ? 'bg-gradient-to-r from-blue-400 to-purple-500 shadow-lg shadow-blue-400/50 animate-pulse'
@@ -76,7 +77,7 @@ export function AnimatedProgress({ steps, currentStep, isActive }: AnimatedProgr
                 >
                   <Icon
                     className={`h-5 w-5 transition-all duration-300 ${
-                      isCompleted || isCurrent ? 'text-white' : 'text-white/50'
+                      isCompleted || isCurrent || isFinalComplete ? 'text-white' : 'text-white/50'
                     }`}
                   />
                   {isCurrent && (
@@ -87,11 +88,11 @@ export function AnimatedProgress({ steps, currentStep, isActive }: AnimatedProgr
                 {/* Step content */}
                 <div className="flex-1">
                   <div className={`text-sm font-medium transition-all duration-300 ${
-                    isCompleted ? 'text-green-300' : isCurrent ? 'text-white' : 'text-white/50'
+                    isCompleted || isFinalComplete ? 'text-green-300' : isCurrent ? 'text-white' : 'text-white/50'
                   }`}>
                     {step}
                   </div>
-                  {isCompleted && (
+                  {(isCompleted || isFinalComplete) && (
                     <div className="text-xs text-green-400 mt-1">
                       ✓ Complete
                     </div>
@@ -116,18 +117,18 @@ export function AnimatedProgress({ steps, currentStep, isActive }: AnimatedProgr
       </div>
 
       {/* Overall progress bar at bottom */}
-      {isActive && (
+      {(isActive || animatedCurrentStep > 0) && (
         <div className="mt-6 pt-4 border-t border-white/20">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-white/70">Overall Progress</span>
             <span className="text-xs text-white/70">
-              {Math.round((animatedCurrentStep / Math.max(1, steps.length)) * 100)}%
+              {!isActive && animatedCurrentStep >= steps.length ? '100' : Math.round((animatedCurrentStep / Math.max(1, steps.length)) * 100)}%
             </span>
           </div>
           <div className="h-2 bg-white/20 rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-blue-400 via-purple-500 to-green-400 transition-all duration-1000 ease-out shadow-lg"
-              style={{ width: `${(animatedCurrentStep / Math.max(1, steps.length)) * 100}%` }}
+              style={{ width: `${!isActive && animatedCurrentStep >= steps.length ? 100 : (animatedCurrentStep / Math.max(1, steps.length)) * 100}%` }}
             />
           </div>
         </div>
