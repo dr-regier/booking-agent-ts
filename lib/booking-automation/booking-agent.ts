@@ -1,6 +1,4 @@
 import { BookingSearchParams, RawPropertyData, PropertyEvaluation, ProgressCallback } from './types';
-import { BrowserManager } from './browser-manager';
-import { BookingScraper } from './booking-scraper';
 import { BookingApiService } from './booking-api';
 import { AIPropertyEvaluator } from './ai-evaluator';
 import type { TravelCriteria } from '@/lib/types/travel';
@@ -20,11 +18,9 @@ interface AccommodationResult {
 }
 
 export class BookingAgent {
-  private browserManager: BrowserManager;
   private progressCallback: ProgressCallback;
 
   constructor(progressCallback: ProgressCallback) {
-    this.browserManager = new BrowserManager();
     this.progressCallback = progressCallback;
   }
 
