@@ -66,13 +66,18 @@ export class BookingApiService {
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        console.error(`Destination lookup failed: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`Destination lookup failed: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Destination API response:', data);
 
       // Find the first city result
       const cityResult = data.find((item: any) => item.dest_type === 'city' || item.dest_type === 'region');
+      console.log('Found destination:', cityResult);
       return cityResult?.dest_id || null;
 
     } catch (error) {
@@ -85,9 +90,10 @@ export class BookingApiService {
     this.progressCallback('Searching hotels via Booking.com API...');
 
     try {
-      // Build API parameters
+      // Build API parameters with required fields
       const searchParams = new URLSearchParams({
         dest_id: destId,
+        dest_type: 'city',  // Required field
         order_by: 'popularity',
         adults_number: (params.guests || 2).toString(),
         room_number: '1',
@@ -96,12 +102,18 @@ export class BookingApiService {
         units: 'metric'
       });
 
-      // Add dates if provided
+      // Add dates in correct format (YYYY-MM-DD) if provided
       if (params.checkIn) {
-        searchParams.append('checkin_date', params.checkIn);
+        const formattedCheckIn = this.formatDateForAPI(params.checkIn);
+        if (formattedCheckIn) {
+          searchParams.append('checkin_date', formattedCheckIn);
+        }
       }
       if (params.checkOut) {
-        searchParams.append('checkout_date', params.checkOut);
+        const formattedCheckOut = this.formatDateForAPI(params.checkOut);
+        if (formattedCheckOut) {
+          searchParams.append('checkout_date', formattedCheckOut);
+        }
       }
 
       const response = await fetch(`${this.baseUrl}/hotels/search?${searchParams}`, {
@@ -113,6 +125,10 @@ export class BookingApiService {
       });
 
       if (!response.ok) {
+        console.error(`Hotels search failed: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Hotels search error response:', errorText);
+        console.error('Search params used:', Object.fromEntries(searchParams));
         throw new Error(`Hotels search failed: ${response.status}`);
       }
 
@@ -161,5 +177,39 @@ export class BookingApiService {
     amenities.push('WiFi', 'Reception', 'Room Service');
 
     return amenities;
+  }
+
+  private formatDateForAPI(dateString: string): string | null {
+    try {
+      // Handle various input formats and convert to YYYY-MM-DD
+      let date: Date;
+
+      if (dateString.includes('/')) {
+        // Handle formats like "9/27" or "9/27/2024"
+        const parts = dateString.split('/');
+        if (parts.length === 2) {
+          // Assume current year if only month/day provided
+          const currentYear = new Date().getFullYear();
+          date = new Date(currentYear, parseInt(parts[0]) - 1, parseInt(parts[1]));
+        } else if (parts.length === 3) {
+          date = new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
+        } else {
+          return null;
+        }
+      } else {
+        // Try parsing as-is
+        date = new Date(dateString);
+      }
+
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+
+      // Format as YYYY-MM-DD
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return null;
+    }
   }
 }
