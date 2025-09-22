@@ -156,7 +156,7 @@ export class BookingApiService {
   }
 
   private convertApiResults(apiResults: BookingApiResponse['result']): RawPropertyData[] {
-    return apiResults.slice(0, 20).map((hotel, index) => {
+    return apiResults.slice(0, 5).map((hotel, index) => {
       this.progressCallback(`Processing property ${index + 1}: ${hotel.hotel_name}`);
 
       return {
