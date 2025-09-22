@@ -109,13 +109,14 @@ export class BookingApiService {
       // Use default dates if not provided (API requires them)
       if (!checkInDate || !checkOutDate || checkInDate.trim() === '' || checkOutDate.trim() === '') {
         const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        const dayAfter = new Date(today);
-        dayAfter.setDate(today.getDate() + 2);
+        // Use dates 7 days from now to ensure they're in the future
+        const weekFromNow = new Date(today);
+        weekFromNow.setDate(today.getDate() + 7);
+        const dayAfterWeek = new Date(today);
+        dayAfterWeek.setDate(today.getDate() + 10);
 
-        if (!checkInDate || checkInDate.trim() === '') checkInDate = tomorrow.toISOString().split('T')[0];
-        if (!checkOutDate || checkOutDate.trim() === '') checkOutDate = dayAfter.toISOString().split('T')[0];
+        if (!checkInDate || checkInDate.trim() === '') checkInDate = weekFromNow.toISOString().split('T')[0];
+        if (!checkOutDate || checkOutDate.trim() === '') checkOutDate = dayAfterWeek.toISOString().split('T')[0];
       }
 
       const formattedCheckIn = this.formatDateForAPI(checkInDate);
