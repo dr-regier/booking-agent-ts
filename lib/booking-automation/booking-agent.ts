@@ -1,6 +1,7 @@
 import { BookingSearchParams, RawPropertyData, PropertyEvaluation, ProgressCallback } from './types';
 import { BrowserManager } from './browser-manager';
 import { BookingScraper } from './booking-scraper';
+import { BookingApiService } from './booking-api';
 import { AIPropertyEvaluator } from './ai-evaluator';
 import type { TravelCriteria } from '@/lib/types/travel';
 
@@ -29,35 +30,27 @@ export class BookingAgent {
 
   async searchAccommodations(criteria: TravelCriteria): Promise<AccommodationResult[]> {
     try {
-      // Initialize browser
+      // Initialize services
       this.progressCallback('Initializing intelligent booking agent...');
-      await this.browserManager.initialize(true); // headless mode
 
       // Convert criteria to search params
       const searchParams = this.convertCriteriaToParams(criteria);
 
-      // Initialize scraper and AI evaluator
-      const scraper = new BookingScraper(this.browserManager, this.progressCallback);
+      // Initialize API service and AI evaluator
+      const bookingApi = new BookingApiService(this.progressCallback);
       const aiEvaluator = new AIPropertyEvaluator(this.progressCallback);
 
-      // Search multiple platforms concurrently for comprehensive coverage
-      this.progressCallback('Starting comprehensive search across booking platforms...');
+      // Search using Booking.com API for reliable data
+      this.progressCallback('Starting accommodation search via Booking.com API...');
 
-      const [bookingProperties, airbnbProperties] = await Promise.all([
-        scraper.searchBookingCom(searchParams).catch(error => {
-          console.error('Booking.com search failed:', error);
-          this.progressCallback('Booking.com search encountered issues, continuing with available results...');
-          return [];
-        }),
-        scraper.searchAirbnb(searchParams).catch(error => {
-          console.error('Airbnb search failed:', error);
-          this.progressCallback('Airbnb search encountered issues, continuing with available results...');
-          return [];
-        })
-      ]);
+      const bookingProperties = await bookingApi.searchAccommodations(searchParams).catch(error => {
+        console.error('Booking.com API search failed:', error);
+        this.progressCallback('Booking.com API search encountered issues, continuing with available results...');
+        return [];
+      });
 
-      // Combine all properties
-      const allProperties = [...bookingProperties, ...airbnbProperties];
+      // Use only API results for now (can add more APIs later)
+      const allProperties = [...bookingProperties];
 
       if (allProperties.length === 0) {
         this.progressCallback('No properties found. Search may have been blocked or destination not available.');
@@ -80,9 +73,6 @@ export class BookingAgent {
       console.error('Booking agent error:', error);
       this.progressCallback('Search encountered an error. Please try again.');
       return [];
-    } finally {
-      // Always close browser
-      await this.browserManager.close();
     }
   }
 
