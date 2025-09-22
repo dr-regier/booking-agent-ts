@@ -102,18 +102,30 @@ export class BookingApiService {
         units: 'metric'
       });
 
-      // Add dates in correct format (YYYY-MM-DD) if provided
-      if (params.checkIn) {
-        const formattedCheckIn = this.formatDateForAPI(params.checkIn);
-        if (formattedCheckIn) {
-          searchParams.append('checkin_date', formattedCheckIn);
-        }
+      // Add dates in correct format (YYYY-MM-DD) - use defaults if not provided since they're required
+      let checkInDate = params.checkIn;
+      let checkOutDate = params.checkOut;
+
+      // Use default dates if not provided (API requires them)
+      if (!checkInDate || !checkOutDate || checkInDate.trim() === '' || checkOutDate.trim() === '') {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const dayAfter = new Date(today);
+        dayAfter.setDate(today.getDate() + 2);
+
+        if (!checkInDate || checkInDate.trim() === '') checkInDate = tomorrow.toISOString().split('T')[0];
+        if (!checkOutDate || checkOutDate.trim() === '') checkOutDate = dayAfter.toISOString().split('T')[0];
       }
-      if (params.checkOut) {
-        const formattedCheckOut = this.formatDateForAPI(params.checkOut);
-        if (formattedCheckOut) {
-          searchParams.append('checkout_date', formattedCheckOut);
-        }
+
+      const formattedCheckIn = this.formatDateForAPI(checkInDate);
+      const formattedCheckOut = this.formatDateForAPI(checkOutDate);
+
+      if (formattedCheckIn) {
+        searchParams.append('checkin_date', formattedCheckIn);
+      }
+      if (formattedCheckOut) {
+        searchParams.append('checkout_date', formattedCheckOut);
       }
 
       const response = await fetch(`${this.baseUrl}/hotels/search?${searchParams}`, {
