@@ -883,8 +883,8 @@ export class BookingScraper {
         this.progressCallback('Testing data extraction on first Airbnb property...');
         const testElement = allProperties[0];
         const testName = await this.extractText(testElement, '[data-testid="listing-card-title"], .t1jojoys');
-        const testPriceText = await this.extractText(testElement, '[data-testid="price-availability"], ._1jo4hgw');
-        const testPrice = await this.extractPrice(testElement, '[data-testid="price-availability"], ._1jo4hgw');
+        const testPriceText = await this.extractText(testElement, '[data-testid="price-availability"], ._1jo4hgw, [data-testid="price"], .price, [aria-label*="price"], [data-testid="listing-card-price"], .price-availability, ._tyxjp1');
+        const testPrice = await this.extractPrice(testElement, '[data-testid="price-availability"], ._1jo4hgw, [data-testid="price"], .price, [aria-label*="price"], [data-testid="listing-card-price"], .price-availability, ._tyxjp1');
 
         console.log(`[DEBUG] Airbnb test extraction:`, {
           name: testName || '(empty)',
@@ -906,7 +906,7 @@ export class BookingScraper {
         try {
           const property: RawPropertyData = {
             name: await this.extractText(element, '[data-testid="listing-card-title"], .t1jojoys'),
-            price: await this.extractPrice(element, '[data-testid="price-availability"], ._1jo4hgw'),
+            price: await this.extractPrice(element, '[data-testid="price-availability"], ._1jo4hgw, [data-testid="price"], .price, [aria-label*="price"], [data-testid="listing-card-price"], .price-availability, ._tyxjp1'),
             rating: await this.extractRating(element, '[data-testid="listing-card-rating"], .r1dxllyb'),
             description: await this.extractText(element, '[data-testid="listing-card-subtitle"], .s1cjsi4j'),
             amenities: await this.extractAirbnbAmenities(element),
@@ -1140,7 +1140,22 @@ export class BookingScraper {
   private async extractPrice(element: any, selector: string): Promise<number> {
     try {
       const priceText = await this.extractText(element, selector);
-      const price = priceText.match(/\d+/);
+      console.log(`[DEBUG] Raw price text found: "${priceText}"`);
+
+      // Try multiple price extraction patterns
+      let price = priceText.match(/\$(\d+)/); // $123
+      if (price) return parseInt(price[1]);
+
+      price = priceText.match(/€(\d+)/); // €123
+      if (price) return parseInt(price[1]);
+
+      price = priceText.match(/(\d+)\s*€/); // 123€ or 123 €
+      if (price) return parseInt(price[1]);
+
+      price = priceText.match(/(\d+)\s*\$/); // 123$ or 123 $
+      if (price) return parseInt(price[1]);
+
+      price = priceText.match(/(\d+)/); // Fallback: any number
       return price ? parseInt(price[0]) : 0;
     } catch {
       return 0;
