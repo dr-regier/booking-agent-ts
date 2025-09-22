@@ -56,25 +56,35 @@ export class AIPropertyEvaluator {
     properties: RawPropertyData[],
     searchParams: BookingSearchParams
   ): RawPropertyData[] {
+    console.log('DEBUG: Filtering properties with budget:', searchParams.budget);
+    console.log('DEBUG: Properties to filter:', properties.map(p => ({ name: p.name, price: p.price, rating: p.rating })));
+
     return properties.filter(property => {
+      console.log(`DEBUG: Checking property "${property.name}": price=${property.price}, rating=${property.rating}`);
+
       // Budget filtering
       if (searchParams.budget?.max && property.price > searchParams.budget.max) {
+        console.log(`DEBUG: Filtered out "${property.name}" - price ${property.price} > budget max ${searchParams.budget.max}`);
         return false;
       }
       if (searchParams.budget?.min && property.price < searchParams.budget.min) {
+        console.log(`DEBUG: Filtered out "${property.name}" - price ${property.price} < budget min ${searchParams.budget.min}`);
         return false;
       }
 
       // Basic quality filtering
       if (property.rating && property.rating < 3.0) {
+        console.log(`DEBUG: Filtered out "${property.name}" - rating ${property.rating} < 3.0`);
         return false;
       }
 
       // Must have basic information
       if (!property.name || property.price <= 0) {
+        console.log(`DEBUG: Filtered out "${property.name}" - missing name or price <= 0`);
         return false;
       }
 
+      console.log(`DEBUG: Property "${property.name}" passed all filters`);
       return true;
     });
   }
