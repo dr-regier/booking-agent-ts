@@ -131,8 +131,7 @@ export function validateTravelCriteria(criteria: TravelCriteria): ValidationResu
     }
   }
 
-  // Temporarily allow search with just destination for testing
-  const canSearchBasic = requirements.destination && errors.length === 0;
+  const canSearchBasic = missing.length === 0 && errors.length === 0;
   const enhancedProgress = getEnhancedCriteriaProgress(criteria);
   const canSearchEnhanced = canSearchBasic && enhancedProgress.completed >= 2; // Need at least 2 enhanced criteria
 
