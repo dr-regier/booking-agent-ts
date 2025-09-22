@@ -24,17 +24,35 @@ export class BookingScraper {
 
       this.progressCallback('Filling search form on Booking.com...');
 
-      // Fill destination
-      const destinationInput = page.locator('[data-testid="destination-container"] input, #ss, [name="ss"]').first();
+      // Fill destination with multiple fallback selectors
+      const destinationSelectors = [
+        '[data-testid="destination-container"] input',
+        '#ss',
+        '[name="ss"]',
+        'input[placeholder*="Where are you going"]',
+        'input[placeholder*="destination"]',
+        '.sb-destination input',
+        '[data-testid="searchbox-destination"] input'
+      ];
+
+      const destinationInput = page.locator(destinationSelectors.join(', ')).first();
       await destinationInput.click();
       await this.browserManager.randomDelay(500, 1000);
       await destinationInput.fill(params.destination);
       await this.browserManager.randomDelay(1000, 2000);
 
-      // Wait for and select the first suggestion
+      // Wait for and select the first suggestion with multiple fallback selectors
       try {
-        await page.waitForSelector('[data-testid="autocomplete-results"] li, .c-autocomplete__item', { timeout: 5000 });
-        await page.locator('[data-testid="autocomplete-results"] li, .c-autocomplete__item').first().click();
+        const suggestionSelectors = [
+          '[data-testid="autocomplete-results"] li',
+          '.c-autocomplete__item',
+          '[role="listbox"] li',
+          '.sb-autocomplete__item',
+          '[data-testid="search-suggestions"] li',
+          '.autocomplete-suggestion'
+        ];
+        await page.waitForSelector(suggestionSelectors.join(', '), { timeout: 5000 });
+        await page.locator(suggestionSelectors.join(', ')).first().click();
       } catch (error) {
         // If no suggestions appear, continue with the typed destination
         console.log('No autocomplete suggestions found, continuing...');
@@ -52,13 +70,28 @@ export class BookingScraper {
         await this.fillGuestCount(page, params.guests);
       }
 
-      // Submit search
+      // Submit search with multiple fallback selectors
       this.progressCallback('Submitting search on Booking.com...');
-      const searchButton = page.locator('[data-testid="header-search-button"], button[type="submit"], .sb-searchbox__button').first();
+      const searchSelectors = [
+        '[data-testid="header-search-button"]',
+        'button[type="submit"]',
+        '.sb-searchbox__button',
+        '[data-testid="searchbox-search-button"]',
+        'button[data-testid="search-button"]',
+        '.sb-searchbox__button-search',
+        'input[type="submit"]',
+        'button:has-text("Search")'
+      ];
+      const searchButton = page.locator(searchSelectors.join(', ')).first();
       await searchButton.click();
 
-      // Wait for results to load
-      await page.waitForLoadState('networkidle');
+      // Wait for results to load with shorter timeout
+      try {
+        await page.waitForLoadState('networkidle', { timeout: 15000 });
+      } catch (error) {
+        console.log('Network idle timeout, continuing with domcontentloaded');
+        await page.waitForLoadState('domcontentloaded');
+      }
       await this.browserManager.randomDelay(3000, 5000);
 
       this.progressCallback('Extracting property data from Booking.com...');
@@ -84,8 +117,18 @@ export class BookingScraper {
 
       this.progressCallback('Filling search form on Airbnb...');
 
-      // Click on the search input
-      const searchInput = page.locator('[data-testid="structured-search-input-field-query"], [placeholder*="Search"], input[name="query"]').first();
+      // Click on the search input with multiple fallback selectors
+      const searchSelectors = [
+        '[data-testid="structured-search-input-field-query"]',
+        '[placeholder*="Search"]',
+        'input[name="query"]',
+        'input[placeholder*="Where"]',
+        '[data-testid="bigsearch-query"]',
+        '.SearchBarFilter input',
+        '[aria-label*="Where"]',
+        '[data-testid="search-field"]'
+      ];
+      const searchInput = page.locator(searchSelectors.join(', ')).first();
       await searchInput.click();
       await this.browserManager.randomDelay(500, 1000);
 
@@ -93,10 +136,18 @@ export class BookingScraper {
       await searchInput.fill(params.destination);
       await this.browserManager.randomDelay(1500, 3000);
 
-      // Wait for and select suggestion
+      // Wait for and select suggestion with multiple fallback selectors
       try {
-        await page.waitForSelector('[data-testid="search-option"], [role="option"]', { timeout: 5000 });
-        await page.locator('[data-testid="search-option"], [role="option"]').first().click();
+        const suggestionSelectors = [
+          '[data-testid="search-option"]',
+          '[role="option"]',
+          '.SearchSuggestion',
+          '[data-testid="suggestion"]',
+          '.search-result',
+          '[role="listbox"] div'
+        ];
+        await page.waitForSelector(suggestionSelectors.join(', '), { timeout: 5000 });
+        await page.locator(suggestionSelectors.join(', ')).first().click();
       } catch (error) {
         console.log('No Airbnb suggestions found, continuing...');
       }
@@ -113,13 +164,27 @@ export class BookingScraper {
         await this.fillAirbnbGuests(page, params.guests);
       }
 
-      // Submit search
+      // Submit search with multiple fallback selectors
       this.progressCallback('Submitting search on Airbnb...');
-      const searchButton = page.locator('[data-testid="structured-search-input-search-button"], button[type="submit"]').first();
+      const searchButtonSelectors = [
+        '[data-testid="structured-search-input-search-button"]',
+        'button[type="submit"]',
+        '[data-testid="bigsearch-search-button"]',
+        'button[aria-label*="Search"]',
+        '.SearchBarFilter button[type="submit"]',
+        'button:has-text("Search")',
+        '[data-testid="search-button"]'
+      ];
+      const searchButton = page.locator(searchButtonSelectors.join(', ')).first();
       await searchButton.click();
 
-      // Wait for results
-      await page.waitForLoadState('networkidle');
+      // Wait for results with shorter timeout
+      try {
+        await page.waitForLoadState('networkidle', { timeout: 15000 });
+      } catch (error) {
+        console.log('Airbnb network idle timeout, continuing with domcontentloaded');
+        await page.waitForLoadState('domcontentloaded');
+      }
       await this.browserManager.randomDelay(3000, 5000);
 
       this.progressCallback('Extracting property data from Airbnb...');
@@ -163,13 +228,35 @@ export class BookingScraper {
     try {
       this.progressCallback('Setting check-in and check-out dates...');
       
-      // Click date picker
-      const dateInput = page.locator('[data-testid="date-display-field"], .sb-date-field, [data-testid="date-picker"]').first();
+      // Click date picker with multiple fallback selectors
+      const dateSelectors = [
+        '[data-testid="date-display-field"]',
+        '.sb-date-field',
+        '[data-testid="date-picker"]',
+        'input[name="checkin_date"]',
+        'input[name="checkout_date"]',
+        '[data-testid="searchbox-dates"]',
+        '.sb-date-field__display',
+        'button[data-testid="date-display-field"]',
+        '[aria-label*="Check-in"]',
+        '[placeholder*="Check-in"]'
+      ];
+      const dateInput = page.locator(dateSelectors.join(', ')).first();
       await dateInput.click();
       await this.browserManager.randomDelay(1000, 2000);
 
-      // Wait for calendar to appear
-      await page.waitForSelector('[data-testid="calendar"], .bui-calendar, .calendar', { timeout: 5000 });
+      // Wait for calendar to appear with multiple fallback selectors
+      const calendarSelectors = [
+        '[data-testid="calendar"]',
+        '.bui-calendar',
+        '.calendar',
+        '[data-testid="searchbox-dates-container"]',
+        '.sb-date-field__input',
+        '[role="dialog"]',
+        '.datepicker',
+        '[data-testid="calendar-wrapper"]'
+      ];
+      await page.waitForSelector(calendarSelectors.join(', '), { timeout: 10000 });
       await this.browserManager.randomDelay(1000, 1500);
 
       // Parse dates
@@ -250,12 +337,31 @@ export class BookingScraper {
     try {
       this.progressCallback(`Setting guest count to ${guests}...`);
       
-      const guestButton = page.locator('[data-testid="occupancy-config"], .sb-group-field, [data-testid="guest-count"]').first();
+      const guestSelectors = [
+        '[data-testid="occupancy-config"]',
+        '.sb-group-field',
+        '[data-testid="guest-count"]',
+        '[data-testid="searchbox-guests"]',
+        'button[aria-label*="guest"]',
+        'button[aria-label*="adult"]',
+        '.sb-group__field',
+        '[data-testid="occupancy-popup"]'
+      ];
+      const guestButton = page.locator(guestSelectors.join(', ')).first();
       await guestButton.click();
       await this.browserManager.randomDelay(1000, 2000);
 
-      // Wait for guest selection dropdown
-      await page.waitForSelector('[data-testid="guest-dropdown"], .bui-dropdown, [data-testid="adults"]', { timeout: 5000 });
+      // Wait for guest selection dropdown with fallback selectors
+      const guestDropdownSelectors = [
+        '[data-testid="guest-dropdown"]',
+        '.bui-dropdown',
+        '[data-testid="adults"]',
+        '.sb-group-field__input',
+        '[data-testid="occupancy-popup"]',
+        '[role="dialog"]',
+        '.guest-picker'
+      ];
+      await page.waitForSelector(guestDropdownSelectors.join(', '), { timeout: 10000 });
       await this.browserManager.randomDelay(1000, 1500);
 
       // Set number of adults (assuming guests = adults for simplicity)
@@ -301,13 +407,31 @@ export class BookingScraper {
     try {
       this.progressCallback('Setting Airbnb check-in and check-out dates...');
       
-      // Click on check-in date field
-      const checkInField = page.locator('[data-testid="structured-search-input-field-checkin"], [data-testid="checkin"]').first();
+      // Click on check-in date field with multiple fallback selectors
+      const checkInSelectors = [
+        '[data-testid="structured-search-input-field-checkin"]',
+        '[data-testid="checkin"]',
+        '[data-testid="bigsearch-checkin"]',
+        'button[aria-label*="Check-in"]',
+        '[placeholder*="Check-in"]',
+        '.SearchBarFilter button:first-of-type',
+        '[data-testid="search-input-checkin"]'
+      ];
+      const checkInField = page.locator(checkInSelectors.join(', ')).first();
       await checkInField.click();
       await this.browserManager.randomDelay(1000, 2000);
 
-      // Wait for calendar to appear
-      await page.waitForSelector('[data-testid="calendar"], ._1m8bb6v', { timeout: 5000 });
+      // Wait for calendar to appear with multiple fallback selectors
+      const calendarSelectors = [
+        '[data-testid="calendar"]',
+        '._1m8bb6v',
+        '[data-testid="datepicker"]',
+        '.DatePicker',
+        '[role="dialog"]',
+        '.calendar-container',
+        '[data-testid="calendar-month"]'
+      ];
+      await page.waitForSelector(calendarSelectors.join(', '), { timeout: 10000 });
       await this.browserManager.randomDelay(1000, 1500);
 
       // Parse and select check-in date
@@ -377,13 +501,31 @@ export class BookingScraper {
     try {
       this.progressCallback(`Setting Airbnb guest count to ${guests}...`);
       
-      // Click on guest count field
-      const guestField = page.locator('[data-testid="structured-search-input-field-guests"], [data-testid="guests"]').first();
+      // Click on guest count field with multiple fallback selectors
+      const guestSelectors = [
+        '[data-testid="structured-search-input-field-guests"]',
+        '[data-testid="guests"]',
+        '[data-testid="bigsearch-guests"]',
+        'button[aria-label*="guest"]',
+        'button[aria-label*="Who"]',
+        '.SearchBarFilter button:last-of-type',
+        '[data-testid="search-input-guests"]'
+      ];
+      const guestField = page.locator(guestSelectors.join(', ')).first();
       await guestField.click();
       await this.browserManager.randomDelay(1000, 2000);
 
-      // Wait for guest selection panel
-      await page.waitForSelector('[data-testid="guest-picker"], ._1m8bb6v', { timeout: 5000 });
+      // Wait for guest selection panel with multiple fallback selectors
+      const guestPanelSelectors = [
+        '[data-testid="guest-picker"]',
+        '._1m8bb6v',
+        '.GuestPicker',
+        '[data-testid="stepper-adults"]',
+        '[role="dialog"]',
+        '.guest-picker-container',
+        '[data-testid="adults-stepper"]'
+      ];
+      await page.waitForSelector(guestPanelSelectors.join(', '), { timeout: 10000 });
       await this.browserManager.randomDelay(1000, 1500);
 
       // Set number of adults
@@ -429,8 +571,18 @@ export class BookingScraper {
     const properties: RawPropertyData[] = [];
 
     try {
-      // Wait for property listings to load
-      await page.waitForSelector('[data-testid="property-card"], .sr_property_block', { timeout: 10000 });
+      // Wait for property listings to load with multiple fallback selectors
+      const propertySelectors = [
+        '[data-testid="property-card"]',
+        '.sr_property_block',
+        '[data-testid="property"]',
+        '.sr-hotel',
+        '.property_card',
+        '[data-testid="listing"]',
+        '.hotel_row',
+        '.accommodation'
+      ];
+      await page.waitForSelector(propertySelectors.join(', '), { timeout: 15000 });
 
       // Apply filters and sorting for better results
       await this.applyBookingFilters(page);
@@ -608,8 +760,17 @@ export class BookingScraper {
         // Scroll down to load more results
         await this.scrollToLoadMore(page);
         
-        // Get current page elements
-        const propertyElements = page.locator('[data-testid="property-card"], .sr_property_block');
+        // Get current page elements with multiple fallback selectors
+        const propertySelectors = [
+          '[data-testid="property-card"]',
+          '.sr_property_block',
+          '[data-testid="property"]',
+          '.sr-hotel',
+          '.property_card',
+          '[data-testid="listing"]',
+          '.hotel_row'
+        ];
+        const propertyElements = page.locator(propertySelectors.join(', '));
         const currentCount = await propertyElements.count();
         
         // Add new elements to our collection
@@ -663,7 +824,17 @@ export class BookingScraper {
     const properties: RawPropertyData[] = [];
 
     try {
-      await page.waitForSelector('[data-testid="card-container"], [itemprop="itemListElement"]', { timeout: 10000 });
+      // Wait for property listings with multiple fallback selectors
+      const propertySelectors = [
+        '[data-testid="card-container"]',
+        '[itemprop="itemListElement"]',
+        '[data-testid="listing"]',
+        '.listing-card',
+        '[data-testid="property-card"]',
+        '.StayCard',
+        '[role="listitem"]'
+      ];
+      await page.waitForSelector(propertySelectors.join(', '), { timeout: 15000 });
 
       // Apply Airbnb filters and sorting
       await this.applyAirbnbFilters(page);
@@ -837,8 +1008,16 @@ export class BookingScraper {
         // Scroll down to load more results
         await this.scrollToLoadMore(page);
         
-        // Get current page elements
-        const propertyElements = page.locator('[data-testid="card-container"], [itemprop="itemListElement"]');
+        // Get current page elements with multiple fallback selectors
+        const propertySelectors = [
+          '[data-testid="card-container"]',
+          '[itemprop="itemListElement"]',
+          '[data-testid="listing"]',
+          '.listing-card',
+          '[data-testid="property-card"]',
+          '.StayCard'
+        ];
+        const propertyElements = page.locator(propertySelectors.join(', '));
         const currentCount = await propertyElements.count();
         
         // Add new elements to our collection
