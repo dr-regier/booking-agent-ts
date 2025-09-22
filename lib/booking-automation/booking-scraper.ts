@@ -590,9 +590,29 @@ export class BookingScraper {
 
       // Scroll and paginate to get more results
       const allProperties = await this.scrollAndPaginateBooking(page);
-      
-      // Limit to reasonable number for AI evaluation (20-30 properties)
-      const maxProperties = Math.min(allProperties.length, 25);
+
+      // Limit to 5 properties for debugging validation issues
+      const maxProperties = Math.min(allProperties.length, 5);
+
+      // Quick validation test on first property
+      if (allProperties.length > 0) {
+        this.progressCallback('Testing data extraction on first Booking.com property...');
+        const testElement = allProperties[0];
+        const testName = await this.extractText(testElement, '[data-testid="title"], .sr-hotel__name, h3');
+        const testPriceText = await this.extractText(testElement, '[data-testid="price-and-discounted-price"], .prco-valign-middle-helper');
+        const testPrice = await this.extractPrice(testElement, '[data-testid="price-and-discounted-price"], .prco-valign-middle-helper');
+
+        console.log(`[DEBUG] Booking.com test extraction:`, {
+          name: testName || '(empty)',
+          priceText: testPriceText || '(empty)',
+          priceExtracted: testPrice,
+          willPassValidation: !!(testName && testPrice > 0)
+        });
+
+        if (!testName || testPrice === 0) {
+          console.warn('[WARNING] Booking.com data extraction may be failing - selectors might be outdated');
+        }
+      }
 
       for (let i = 0; i < maxProperties; i++) {
         this.progressCallback(`Evaluating Booking.com property ${i + 1} of ${maxProperties}...`);
@@ -612,11 +632,23 @@ export class BookingScraper {
             source: 'booking.com'
           };
 
+          console.log(`[DEBUG] Booking.com property ${i + 1} extraction:`, {
+            name: property.name || '(empty)',
+            price: property.price,
+            rating: property.rating,
+            hasName: !!property.name,
+            hasPrice: property.price > 0,
+            willPass: !!(property.name && property.price > 0)
+          });
+
           if (property.name && property.price > 0) {
             properties.push(property);
+            console.log(`✅ Booking.com property ${i + 1} passed validation`);
+          } else {
+            console.log(`❌ Booking.com property ${i + 1} failed validation: ${!property.name ? 'missing name' : ''} ${property.price <= 0 ? 'missing/invalid price' : ''}`);
           }
         } catch (error) {
-          console.log(`Error extracting property ${i + 1}:`, error);
+          console.log(`Error extracting Booking.com property ${i + 1}:`, error);
         }
 
         // Human-like delay between property evaluations
@@ -751,7 +783,7 @@ export class BookingScraper {
   private async scrollAndPaginateBooking(page: Page): Promise<any[]> {
     const allElements: any[] = [];
     let pageNumber = 1;
-    const maxPages = 3; // Limit to 3 pages to avoid too many results
+    const maxPages = 1; // Limit to 1 page for debugging
 
     try {
       while (pageNumber <= maxPages) {
@@ -842,9 +874,29 @@ export class BookingScraper {
 
       // Scroll and paginate to get more results
       const allProperties = await this.scrollAndPaginateAirbnb(page);
-      
-      // Limit to reasonable number for AI evaluation
-      const maxProperties = Math.min(allProperties.length, 20);
+
+      // Limit to 5 properties for debugging validation issues
+      const maxProperties = Math.min(allProperties.length, 5);
+
+      // Quick validation test on first property
+      if (allProperties.length > 0) {
+        this.progressCallback('Testing data extraction on first Airbnb property...');
+        const testElement = allProperties[0];
+        const testName = await this.extractText(testElement, '[data-testid="listing-card-title"], .t1jojoys');
+        const testPriceText = await this.extractText(testElement, '[data-testid="price-availability"], ._1jo4hgw');
+        const testPrice = await this.extractPrice(testElement, '[data-testid="price-availability"], ._1jo4hgw');
+
+        console.log(`[DEBUG] Airbnb test extraction:`, {
+          name: testName || '(empty)',
+          priceText: testPriceText || '(empty)',
+          priceExtracted: testPrice,
+          willPassValidation: !!(testName && testPrice > 0)
+        });
+
+        if (!testName || testPrice === 0) {
+          console.warn('[WARNING] Airbnb data extraction may be failing - selectors might be outdated');
+        }
+      }
 
       for (let i = 0; i < maxProperties; i++) {
         this.progressCallback(`Evaluating Airbnb property ${i + 1} of ${maxProperties}...`);
@@ -864,8 +916,20 @@ export class BookingScraper {
             source: 'airbnb.com'
           };
 
+          console.log(`[DEBUG] Airbnb property ${i + 1} extraction:`, {
+            name: property.name || '(empty)',
+            price: property.price,
+            rating: property.rating,
+            hasName: !!property.name,
+            hasPrice: property.price > 0,
+            willPass: !!(property.name && property.price > 0)
+          });
+
           if (property.name && property.price > 0) {
             properties.push(property);
+            console.log(`✅ Airbnb property ${i + 1} passed validation`);
+          } else {
+            console.log(`❌ Airbnb property ${i + 1} failed validation: ${!property.name ? 'missing name' : ''} ${property.price <= 0 ? 'missing/invalid price' : ''}`);
           }
         } catch (error) {
           console.log(`Error extracting Airbnb property ${i + 1}:`, error);
@@ -999,7 +1063,7 @@ export class BookingScraper {
   private async scrollAndPaginateAirbnb(page: Page): Promise<any[]> {
     const allElements: any[] = [];
     let pageNumber = 1;
-    const maxPages = 2; // Limit to 2 pages for Airbnb
+    const maxPages = 1; // Limit to 1 page for debugging
 
     try {
       while (pageNumber <= maxPages) {
