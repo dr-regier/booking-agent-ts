@@ -102,6 +102,10 @@ export class BookingApiService {
         units: 'metric'
       });
 
+      // Note: Current Booking.com API doesn't support budget filtering parameters
+      // We've tested price_min, price_max, min_price, max_price - none work
+      // All budget filtering must be done locally in AI evaluator
+
       // Add dates in correct format (YYYY-MM-DD) - use defaults if not provided since they're required
       let checkInDate = params.checkIn;
       let checkOutDate = params.checkOut;
@@ -146,6 +150,25 @@ export class BookingApiService {
       }
 
       const data: BookingApiResponse = await response.json();
+
+      console.log(`API returned ${data.result?.length || 0} properties`);
+      if (data.result?.length > 0) {
+        const prices = data.result.map(h => h.min_total_price).filter(p => p > 0);
+        const priceRange = {
+          min: Math.min(...prices),
+          max: Math.max(...prices),
+          average: Math.round(prices.reduce((a, b) => a + b, 0) / prices.length)
+        };
+        console.log('Price range from API:', priceRange);
+
+        // Detect if API budget filtering is working
+        if (params.budget?.max && priceRange.min > params.budget.max) {
+          console.warn(`⚠️  API budget filtering NOT working: requested max $${params.budget.max}, got min $${priceRange.min}`);
+          console.warn(`This will require local filtering and may return 0 results`);
+        } else if (params.budget?.max) {
+          console.log(`✅ Budget constraint satisfied: requested max $${params.budget.max}, API min $${priceRange.min}`);
+        }
+      }
 
       // Convert API response to our property format
       return this.convertApiResults(data.result || []);

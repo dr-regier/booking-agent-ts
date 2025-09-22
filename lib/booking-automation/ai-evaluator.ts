@@ -56,7 +56,9 @@ export class AIPropertyEvaluator {
     properties: RawPropertyData[],
     searchParams: BookingSearchParams
   ): RawPropertyData[] {
-    return properties.filter(property => {
+    const originalCount = properties.length;
+
+    const filtered = properties.filter(property => {
       // Budget filtering
       if (searchParams.budget?.max && property.price > searchParams.budget.max) {
         return false;
@@ -77,6 +79,22 @@ export class AIPropertyEvaluator {
 
       return true;
     });
+
+    const filteredCount = filtered.length;
+    const budgetFilteredCount = properties.filter(p =>
+      searchParams.budget?.max && p.price > searchParams.budget.max
+    ).length;
+
+    console.log(`Local filtering results: ${originalCount} → ${filteredCount} properties`);
+    if (budgetFilteredCount > 0) {
+      console.log(`  ↳ ${budgetFilteredCount} properties filtered out due to budget constraints`);
+    }
+
+    if (filteredCount === 0 && originalCount > 0) {
+      console.warn(`⚠️  All ${originalCount} properties filtered out - consider adjusting budget or switching to API with budget filtering`);
+    }
+
+    return filtered;
   }
 
   private async evaluateProperty(
