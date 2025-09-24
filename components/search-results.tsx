@@ -72,7 +72,14 @@ export function SearchResults({ results, onClear }: SearchResultsProps) {
                       src={accommodation.imageUrl}
                       alt={accommodation.name}
                       className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                      onLoad={() => {
+                        console.log(`✅ Image loaded successfully for: ${accommodation.name}`);
+                      }}
                       onError={(e) => {
+                        console.log(`❌ Image failed to load for: ${accommodation.name}`, {
+                          url: accommodation.imageUrl,
+                          error: 'Image load error - likely CORS or authentication issue'
+                        });
                         // Fallback to placeholder if image fails to load
                         e.currentTarget.style.display = 'none';
                         if (e.currentTarget.nextElementSibling) {
