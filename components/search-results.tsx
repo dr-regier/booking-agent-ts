@@ -11,6 +11,7 @@ interface AccommodationResult {
   description: string;
   amenities: string[];
   location: string;
+  imageUrl?: string;
   matchScore?: number;
 }
 
@@ -63,10 +64,34 @@ export function SearchResults({ results, onClear }: SearchResultsProps) {
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="grid md:grid-cols-3 gap-0">
-              {/* Property Image Placeholder */}
-              <div className="bg-gradient-to-br from-blue-100 via-teal-50 to-blue-200 h-48 md:h-full flex items-center justify-center relative overflow-hidden">
+              {/* Property Image */}
+              <div className="relative h-48 md:h-full overflow-hidden">
+                {accommodation.imageUrl ? (
+                  <>
+                    <img
+                      src={accommodation.imageUrl}
+                      alt={accommodation.name}
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                      onError={(e) => {
+                        // Fallback to placeholder if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        if (e.currentTarget.nextElementSibling) {
+                          (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                        }
+                      }}
+                    />
+                    {/* Fallback placeholder (hidden by default) */}
+                    <div className="bg-gradient-to-br from-blue-100 via-teal-50 to-blue-200 w-full h-full items-center justify-center absolute inset-0 hidden">
+                      <div className="text-4xl opacity-30">🏨</div>
+                    </div>
+                  </>
+                ) : (
+                  // Default placeholder when no image URL is provided
+                  <div className="bg-gradient-to-br from-blue-100 via-teal-50 to-blue-200 w-full h-full flex items-center justify-center">
+                    <div className="text-4xl opacity-30">🏨</div>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                <div className="text-4xl opacity-30">🏨</div>
                 <div className="absolute top-2 left-2">
                   <Badge className="bg-white/90 text-gray-800 border border-gray-300 text-xs">
                     Featured
