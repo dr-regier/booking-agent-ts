@@ -9,6 +9,9 @@ interface SerpApiProperty {
   // Fields from ads array
   extracted_price?: number;
   price?: string;
+  // Image fields (different structures in ads vs properties)
+  thumbnail?: string;
+  main_photo_url?: string;
   gps_coordinates?: {
     latitude: number;
     longitude: number;
@@ -366,6 +369,9 @@ export class SerpApiService {
       // Extract location
       const location = this.extractLocation(property);
 
+      // Extract image with comprehensive fallback logic
+      const imageUrl = this.extractImageUrl(property, index + 1);
+
       return {
         name: property.name || 'Unknown Property',
         price: Math.round(pricePerNight),
@@ -373,7 +379,7 @@ export class SerpApiService {
         description,
         amenities,
         location,
-        imageUrl: property.images?.[0]?.original_image || property.images?.[0]?.thumbnail,
+        imageUrl,
         bookingUrl: property.link,
         source: 'google_hotels'
       };
@@ -431,6 +437,29 @@ export class SerpApiService {
     }
 
     return [...new Set(amenities)]; // Remove duplicates
+  }
+
+  private extractImageUrl(property: SerpApiProperty, propertyIndex: number): string | undefined {
+    // Priority order for image extraction
+    const imageSources = [
+      property.thumbnail,                              // From ads array
+      property.images?.[0]?.original_image,           // High quality from properties
+      property.images?.[0]?.thumbnail,                // Lower quality from properties
+      property.main_photo_url,                        // Alternative field name
+    ].filter(Boolean); // Remove undefined/null values
+
+    const selectedImage = imageSources[0];
+
+    console.log(`🖼️  Property ${propertyIndex} (${property.name}): Image sources found:`, {
+      thumbnail: !!property.thumbnail,
+      originalImage: !!property.images?.[0]?.original_image,
+      thumbnailFromImages: !!property.images?.[0]?.thumbnail,
+      mainPhotoUrl: !!property.main_photo_url,
+      selectedImage: selectedImage ? 'Found' : 'None',
+      selectedUrl: selectedImage?.substring(0, 60) + '...'
+    });
+
+    return selectedImage;
   }
 
   private extractLocation(property: SerpApiProperty): string {
