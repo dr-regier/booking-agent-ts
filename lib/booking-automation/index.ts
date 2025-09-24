@@ -1,6 +1,5 @@
 export { BookingAgent } from './booking-agent';
-export { BrowserManager } from './browser-manager';
-export { BookingScraper } from './booking-scraper';
+export { SerpApiService } from './booking-api';
 export { AIPropertyEvaluator } from './ai-evaluator';
 export type {
   BookingSearchParams,

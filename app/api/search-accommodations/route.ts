@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         try {
           if (shouldUseRealSearch) {
-            // Use real Playwright automation
+            // Use real SerpApi Google Hotels search
             const progressCallback = (message: string) => {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({
                 type: 'progress',

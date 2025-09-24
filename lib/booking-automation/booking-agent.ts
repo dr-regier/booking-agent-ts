@@ -1,5 +1,5 @@
 import { BookingSearchParams, RawPropertyData, PropertyEvaluation, ProgressCallback } from './types';
-import { BookingApiService } from './booking-api';
+import { SerpApiService } from './booking-api';
 import { AIPropertyEvaluator } from './ai-evaluator';
 import type { TravelCriteria } from '@/lib/types/travel';
 
@@ -33,27 +33,27 @@ export class BookingAgent {
       const searchParams = this.convertCriteriaToParams(criteria);
 
       // Initialize API service and AI evaluator
-      const bookingApi = new BookingApiService(this.progressCallback);
+      const serpApi = new SerpApiService(this.progressCallback);
       const aiEvaluator = new AIPropertyEvaluator(this.progressCallback);
 
-      // Search using Booking.com API for reliable data
-      this.progressCallback('Starting accommodation search via Booking.com API...');
+      // Search using SerpApi Google Hotels with comprehensive pre-filtering
+      this.progressCallback('Starting intelligent accommodation search via Google Hotels...');
 
-      const bookingProperties = await bookingApi.searchAccommodations(searchParams).catch(error => {
-        console.error('Booking.com API search failed:', error);
-        this.progressCallback('Booking.com API search encountered issues, continuing with available results...');
+      const googleProperties = await serpApi.searchAccommodations(searchParams, criteria).catch(error => {
+        console.error('SerpApi Google Hotels search failed:', error);
+        this.progressCallback('Google Hotels search encountered issues, continuing with available results...');
         return [];
       });
 
-      // Use only API results for now (can add more APIs later)
-      const allProperties = [...bookingProperties];
+      // Use Google Hotels results (can add more APIs later)
+      const allProperties = [...googleProperties];
 
       if (allProperties.length === 0) {
-        this.progressCallback('No properties found. Search may have been blocked or destination not available.');
+        this.progressCallback('No properties found matching your criteria. Try adjusting your budget, dates, or requirements.');
         return [];
       }
 
-      this.progressCallback(`Found ${allProperties.length} properties. Starting intelligent evaluation...`);
+      this.progressCallback(`Found ${allProperties.length} pre-filtered properties. Starting intelligent evaluation...`);
 
       // AI-powered evaluation and ranking
       const evaluations = await aiEvaluator.evaluateProperties(allProperties, searchParams);
@@ -61,7 +61,7 @@ export class BookingAgent {
       // Convert to final format
       const results = this.convertEvaluationsToResults(evaluations);
 
-      this.progressCallback('Search complete. Properties ranked by match score and value.');
+      this.progressCallback('Search complete. Properties pre-filtered and ranked by AI match score.');
 
       return results;
 
@@ -103,15 +103,15 @@ export class BookingAgent {
     searchParams: BookingSearchParams,
     existingResults: AccommodationResult[]
   ): Promise<RawPropertyData[]> {
-    // This could be implemented to search Hotels.com, Expedia, etc.
-    // if the initial search doesn't provide enough variety or good options
+    // This could be implemented to search additional APIs like Expedia, Priceline, etc.
+    // if the Google Hotels search doesn't provide enough variety or good options
 
     const hasLowBudgetOptions = existingResults.some(r => r.price < (searchParams.budget?.min || 100));
     const hasHighRatedOptions = existingResults.some(r => r.rating > 4.0);
 
     if (!hasLowBudgetOptions || !hasHighRatedOptions) {
-      this.progressCallback('Expanding search to additional booking sites for better coverage...');
-      // Implementation would go here for Hotels.com, Expedia, etc.
+      this.progressCallback('Considering additional hotel sources for broader coverage...');
+      // Implementation would go here for additional APIs
     }
 
     return [];

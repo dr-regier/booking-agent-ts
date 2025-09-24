@@ -1,230 +1,432 @@
 import { BookingSearchParams, RawPropertyData, ProgressCallback } from './types';
+import type { TravelCriteria } from '@/lib/types/travel';
 
-interface BookingApiResponse {
-  result: {
-    hotel_id: string;
-    hotel_name: string;
-    address: string;
-    min_total_price: number;
-    review_score: number;
-    review_score_word: string;
-    main_photo_url: string;
-    url: string;
-    accommodation_type_name: string;
-    distance_to_cc: string;
-    review_nr: number;
-  }[];
+interface SerpApiProperty {
+  type: string;
+  name: string;
+  description?: string;
+  link?: string;
+  gps_coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+  check_in_time?: string;
+  check_out_time?: string;
+  rate_per_night?: {
+    lowest?: string;
+    extracted_lowest?: number;
+    before_taxes_fees?: string;
+    extracted_before_taxes_fees?: number;
+  };
+  total_rate?: {
+    lowest?: string;
+    extracted_lowest?: number;
+    before_taxes_fees?: string;
+    extracted_before_taxes_fees?: number;
+  };
+  nearby_places?: Array<{
+    name: string;
+    transportations?: Array<{
+      type: string;
+      duration: string;
+    }>;
+  }>;
+  images?: Array<{
+    thumbnail: string;
+    original_image: string;
+  }>;
+  overall_rating?: number;
+  reviews?: number;
+  location_rating?: number;
+  amenities?: string[];
+  excluded_amenities?: string[];
+  essential_info?: string[];
+  property_token?: string;
+  serpapi_property_details_link?: string;
 }
 
-export class BookingApiService {
+interface SerpApiResponse {
+  search_metadata?: any;
+  search_parameters?: any;
+  properties?: SerpApiProperty[];
+  brands?: any[];
+  ads?: any[];
+  pagination?: {
+    next_page_token?: string;
+  };
+}
+
+// Amenity mapping for common user requests to SerpApi amenity filtering
+const AMENITY_KEYWORDS = {
+  'pool': ['pool', 'swimming'],
+  'gym': ['gym', 'fitness', 'workout'],
+  'spa': ['spa', 'wellness', 'massage'],
+  'wifi': ['wifi', 'internet', 'wireless'],
+  'parking': ['parking', 'garage', 'valet'],
+  'pet': ['pet', 'dog', 'cat', 'animal'],
+  'business': ['business', 'meeting', 'conference'],
+  'restaurant': ['restaurant', 'dining', 'food'],
+  'bar': ['bar', 'lounge', 'cocktail'],
+  'room service': ['room service', 'in-room dining'],
+  'concierge': ['concierge', 'guest services'],
+  'laundry': ['laundry', 'dry cleaning'],
+  'air conditioning': ['ac', 'air conditioning', 'climate control'],
+  'kitchen': ['kitchen', 'kitchenette', 'cooking'],
+  'balcony': ['balcony', 'terrace', 'patio'],
+  'ocean view': ['ocean', 'sea', 'beach view'],
+  'city view': ['city view', 'skyline'],
+  'accessible': ['accessible', 'wheelchair', 'disability']
+};
+
+export class SerpApiService {
   private progressCallback: ProgressCallback;
   private apiKey: string;
-  private baseUrl = 'https://booking-com.p.rapidapi.com/v1';
+  private baseUrl = 'https://serpapi.com/search';
 
   constructor(progressCallback: ProgressCallback) {
     this.progressCallback = progressCallback;
-    this.apiKey = process.env.RAPIDAPI_KEY || '';
+    this.apiKey = process.env.SERPAPI_API_KEY || '';
 
     if (!this.apiKey) {
-      throw new Error('RAPIDAPI_KEY environment variable is required');
+      throw new Error('SERPAPI_API_KEY environment variable is required');
     }
   }
 
-  async searchAccommodations(params: BookingSearchParams): Promise<RawPropertyData[]> {
-    this.progressCallback('Fetching accommodation data from Booking.com API...');
+  async searchAccommodations(params: BookingSearchParams, fullCriteria?: TravelCriteria): Promise<RawPropertyData[]> {
+    this.progressCallback('Initializing SerpApi Google Hotels search...');
 
     try {
-      // First, get destination ID
-      const destId = await this.getDestinationId(params.destination);
-      if (!destId) {
-        throw new Error(`Could not find destination ID for: ${params.destination}`);
-      }
+      // Build comprehensive search parameters with pre-filtering
+      const searchParams = this.buildSerpApiParameters(params, fullCriteria);
 
-      // Then search for hotels
-      const properties = await this.searchHotels(destId, params);
+      this.logSearchStrategy(searchParams, fullCriteria);
 
-      this.progressCallback(`Found ${properties.length} properties from Booking.com API`);
+      // Execute search
+      const properties = await this.executeSearch(searchParams);
+
+      this.progressCallback(`Found ${properties.length} pre-filtered properties matching your criteria`);
       return properties;
 
     } catch (error) {
-      console.error('Booking.com API error:', error);
-      this.progressCallback('Booking.com API search failed, continuing with available results...');
+      console.error('SerpApi Google Hotels error:', error);
+      this.progressCallback('Google Hotels search encountered issues, continuing with available results...');
       return [];
     }
   }
 
-  private async getDestinationId(destination: string): Promise<string | null> {
-    this.progressCallback(`Looking up destination: ${destination}...`);
+  private buildSerpApiParameters(params: BookingSearchParams, criteria?: TravelCriteria): URLSearchParams {
+    const searchParams = new URLSearchParams();
 
-    try {
-      const response = await fetch(`${this.baseUrl}/hotels/locations?name=${encodeURIComponent(destination)}&locale=en-gb`, {
-        method: 'GET',
-        headers: {
-          'X-RapidAPI-Key': this.apiKey,
-          'X-RapidAPI-Host': 'booking-com.p.rapidapi.com'
-        }
-      });
+    // Required parameters
+    searchParams.append('api_key', this.apiKey);
+    searchParams.append('engine', 'google_hotels');
+    searchParams.append('q', params.destination);
+    searchParams.append('currency', 'USD');
 
-      if (!response.ok) {
-        console.error(`Destination lookup failed: ${response.status}`);
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Destination lookup failed: ${response.status}`);
+    // Date parameters
+    const { checkIn, checkOut } = this.processDateParameters(params);
+    if (checkIn) searchParams.append('check_in_date', checkIn);
+    if (checkOut) searchParams.append('check_out_date', checkOut);
+
+    // Guest parameters
+    const { adults, children } = this.processGuestParameters(params.guests);
+    searchParams.append('adults', adults.toString());
+    if (children > 0) {
+      searchParams.append('children', children.toString());
+    }
+
+    // Budget pre-filtering (KEY IMPROVEMENT)
+    if (params.budget?.min) {
+      searchParams.append('min_price', params.budget.min.toString());
+    }
+    if (params.budget?.max) {
+      searchParams.append('max_price', params.budget.max.toString());
+    }
+
+    // Property type pre-filtering
+    this.applyPropertyTypeFilters(searchParams, criteria);
+
+    // Quality/Rating pre-filtering
+    this.applyQualityFilters(searchParams, criteria);
+
+    // Amenities pre-filtering
+    this.applyAmenityFilters(searchParams, criteria);
+
+    // Flexibility pre-filtering
+    this.applyFlexibilityFilters(searchParams, criteria);
+
+    // Sorting for best value
+    searchParams.append('sort_by', '3'); // Lowest price
+
+    return searchParams;
+  }
+
+  private processDateParameters(params: BookingSearchParams): { checkIn: string | null, checkOut: string | null } {
+    let checkIn = params.checkIn;
+    let checkOut = params.checkOut;
+
+    // Use default dates if not provided
+    if (!checkIn || !checkOut || checkIn.trim() === '' || checkOut.trim() === '') {
+      const today = new Date();
+      const weekFromNow = new Date(today);
+      weekFromNow.setDate(today.getDate() + 7);
+      const dayAfterWeek = new Date(today);
+      dayAfterWeek.setDate(today.getDate() + 10);
+
+      if (!checkIn || checkIn.trim() === '') checkIn = weekFromNow.toISOString().split('T')[0];
+      if (!checkOut || checkOut.trim() === '') checkOut = dayAfterWeek.toISOString().split('T')[0];
+    }
+
+    return {
+      checkIn: this.formatDateForAPI(checkIn),
+      checkOut: this.formatDateForAPI(checkOut)
+    };
+  }
+
+  private processGuestParameters(guests?: number): { adults: number, children: number } {
+    // Simple logic: assume adults unless specified otherwise
+    const totalGuests = guests || 2;
+    const adults = Math.max(1, Math.min(totalGuests, 8)); // Max 8 adults for API
+    const children = 0; // Could be enhanced to extract from chat context
+
+    return { adults, children };
+  }
+
+  private applyPropertyTypeFilters(searchParams: URLSearchParams, criteria?: TravelCriteria): void {
+    if (!criteria?.propertyType) return;
+
+    const propertyType = criteria.propertyType.toLowerCase();
+
+    if (propertyType.includes('apartment') ||
+        propertyType.includes('rental') ||
+        propertyType.includes('house') ||
+        propertyType.includes('unique')) {
+      searchParams.append('vacation_rentals', 'true');
+
+      // Add bedroom requirements for larger groups
+      if (criteria.guests && criteria.guests > 2) {
+        const bedrooms = Math.ceil(criteria.guests / 2);
+        searchParams.append('bedrooms', bedrooms.toString());
       }
+    }
+    // Default is hotels (no parameter needed)
+  }
 
-      const data = await response.json();
-      console.log('Destination API response:', data);
+  private applyQualityFilters(searchParams: URLSearchParams, criteria?: TravelCriteria): void {
+    if (!criteria) return;
 
-      // Find the first city result
-      const cityResult = data.find((item: any) => item.dest_type === 'city' || item.dest_type === 'region');
-      console.log('Found destination:', cityResult);
-      return cityResult?.dest_id || null;
+    const purpose = criteria.tripPurpose?.toLowerCase() || '';
+    const hasLuxuryKeywords = criteria.additionalRequests?.some(req =>
+      req.toLowerCase().includes('luxury') ||
+      req.toLowerCase().includes('upscale') ||
+      req.toLowerCase().includes('premium')
+    ) || false;
 
-    } catch (error) {
-      console.error('Error getting destination ID:', error);
-      return null;
+    // Rating filters based on context
+    if (purpose.includes('business') || hasLuxuryKeywords) {
+      searchParams.append('rating', '8'); // 4.0+ stars
+      if (hasLuxuryKeywords) {
+        searchParams.append('hotel_class', '5'); // 5-star for luxury
+      } else {
+        searchParams.append('hotel_class', '4'); // 4-star for business
+      }
+    } else if (purpose.includes('romantic') || purpose.includes('honeymoon')) {
+      searchParams.append('rating', '9'); // 4.5+ stars
+    } else if (criteria.locationPreferences?.some(pref =>
+      pref.toLowerCase().includes('quality') ||
+      pref.toLowerCase().includes('rated')
+    )) {
+      searchParams.append('rating', '8'); // 4.0+ stars
     }
   }
 
-  private async searchHotels(destId: string, params: BookingSearchParams): Promise<RawPropertyData[]> {
-    this.progressCallback('Searching hotels via Booking.com API...');
+  private applyAmenityFilters(searchParams: URLSearchParams, criteria?: TravelCriteria): void {
+    if (!criteria?.amenities || criteria.amenities.length === 0) return;
 
-    try {
-      // Build API parameters with required fields
-      const searchParams = new URLSearchParams({
-        dest_id: destId,
-        dest_type: 'city',  // Required field
-        order_by: 'popularity',
-        adults_number: (params.guests || 2).toString(),
-        room_number: '1',
-        filter_by_currency: 'USD',
-        locale: 'en-gb',
-        units: 'metric'
-      });
+    // Note: SerpApi amenity filtering requires specific amenity IDs
+    // This is a simplified implementation - in production, you'd map to actual IDs
+    const importantAmenities = criteria.amenities.filter(amenity => {
+      const amenityLower = amenity.toLowerCase();
+      return amenityLower.includes('pool') ||
+             amenityLower.includes('gym') ||
+             amenityLower.includes('spa') ||
+             amenityLower.includes('parking') ||
+             amenityLower.includes('pet');
+    });
 
-      // Note: Current Booking.com API doesn't support budget filtering parameters
-      // We've tested price_min, price_max, min_price, max_price - none work
-      // All budget filtering must be done locally in AI evaluator
+    if (importantAmenities.length > 0) {
+      // In a full implementation, you'd map these to SerpApi amenity IDs
+      // For now, we'll rely on post-processing filtering
+      console.log('Amenity filtering requested:', importantAmenities);
+    }
+  }
 
-      // Add dates in correct format (YYYY-MM-DD) - use defaults if not provided since they're required
-      let checkInDate = params.checkIn;
-      let checkOutDate = params.checkOut;
+  private applyFlexibilityFilters(searchParams: URLSearchParams, criteria?: TravelCriteria): void {
+    if (criteria?.flexibleCancellation) {
+      searchParams.append('free_cancellation', 'true');
+    }
 
-      // Use default dates if not provided (API requires them)
-      if (!checkInDate || !checkOutDate || checkInDate.trim() === '' || checkOutDate.trim() === '') {
-        const today = new Date();
-        // Use dates 7 days from now to ensure they're in the future
-        const weekFromNow = new Date(today);
-        weekFromNow.setDate(today.getDate() + 7);
-        const dayAfterWeek = new Date(today);
-        dayAfterWeek.setDate(today.getDate() + 10);
+    // Check for deal-seeking behavior
+    if (criteria?.additionalRequests?.some(req =>
+      req.toLowerCase().includes('deal') ||
+      req.toLowerCase().includes('discount') ||
+      req.toLowerCase().includes('special')
+    )) {
+      searchParams.append('special_offers', 'true');
+    }
+  }
 
-        if (!checkInDate || checkInDate.trim() === '') checkInDate = weekFromNow.toISOString().split('T')[0];
-        if (!checkOutDate || checkOutDate.trim() === '') checkOutDate = dayAfterWeek.toISOString().split('T')[0];
+  private async executeSearch(searchParams: URLSearchParams): Promise<RawPropertyData[]> {
+    this.progressCallback('Executing pre-filtered search via Google Hotels...');
+
+    const response = await fetch(`${this.baseUrl}?${searchParams}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
       }
+    });
 
-      const formattedCheckIn = this.formatDateForAPI(checkInDate);
-      const formattedCheckOut = this.formatDateForAPI(checkOutDate);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('SerpApi search failed:', response.status, errorText);
+      throw new Error(`SerpApi search failed: ${response.status}`);
+    }
 
-      if (formattedCheckIn) {
-        searchParams.append('checkin_date', formattedCheckIn);
-      }
-      if (formattedCheckOut) {
-        searchParams.append('checkout_date', formattedCheckOut);
-      }
+    const data: SerpApiResponse = await response.json();
 
-      const response = await fetch(`${this.baseUrl}/hotels/search?${searchParams}`, {
-        method: 'GET',
-        headers: {
-          'X-RapidAPI-Key': this.apiKey,
-          'X-RapidAPI-Host': 'booking-com.p.rapidapi.com'
-        }
-      });
+    if (!data.properties || data.properties.length === 0) {
+      this.progressCallback('No properties found with current filters. Try broadening your criteria.');
+      return [];
+    }
 
-      if (!response.ok) {
-        console.error(`Hotels search failed: ${response.status}`);
-        const errorText = await response.text();
-        console.error('Hotels search error response:', errorText);
-        console.error('Search params used:', Object.fromEntries(searchParams));
-        throw new Error(`Hotels search failed: ${response.status}`);
-      }
+    console.log(`SerpApi returned ${data.properties.length} properties`);
 
-      const data: BookingApiResponse = await response.json();
+    // Log price range for debugging
+    if (data.properties.length > 0) {
+      const prices = data.properties
+        .map(p => p.rate_per_night?.extracted_lowest || p.total_rate?.extracted_lowest)
+        .filter(p => p && p > 0) as number[];
 
-      console.log(`API returned ${data.result?.length || 0} properties`);
-      if (data.result?.length > 0) {
-        const prices = data.result.map(h => h.min_total_price).filter(p => p > 0);
+      if (prices.length > 0) {
         const priceRange = {
           min: Math.min(...prices),
           max: Math.max(...prices),
           average: Math.round(prices.reduce((a, b) => a + b, 0) / prices.length)
         };
-        console.log('Price range from API:', priceRange);
-
-        // Detect if API budget filtering is working
-        if (params.budget?.max && priceRange.min > params.budget.max) {
-          console.warn(`⚠️  API budget filtering NOT working: requested max $${params.budget.max}, got min $${priceRange.min}`);
-          console.warn(`This will require local filtering and may return 0 results`);
-        } else if (params.budget?.max) {
-          console.log(`✅ Budget constraint satisfied: requested max $${params.budget.max}, API min $${priceRange.min}`);
-        }
+        console.log('Price range from SerpApi:', priceRange);
       }
-
-      // Convert API response to our property format
-      return this.convertApiResults(data.result || []);
-
-    } catch (error) {
-      console.error('Error searching hotels:', error);
-      return [];
     }
+
+    return this.convertSerpApiResults(data.properties);
   }
 
-  private convertApiResults(apiResults: BookingApiResponse['result']): RawPropertyData[] {
-    return apiResults.slice(0, 5).map((hotel, index) => {
-      this.progressCallback(`Processing property ${index + 1}: ${hotel.hotel_name}`);
+  private convertSerpApiResults(properties: SerpApiProperty[]): RawPropertyData[] {
+    return properties.slice(0, 8).map((property, index) => {
+      this.progressCallback(`Processing property ${index + 1}: ${property.name}`);
+
+      // Extract price (prefer per-night rate)
+      const pricePerNight = property.rate_per_night?.extracted_lowest ||
+                           property.rate_per_night?.extracted_before_taxes_fees ||
+                           property.total_rate?.extracted_lowest || 0;
+
+      // Build description
+      const description = this.buildPropertyDescription(property);
+
+      // Extract amenities
+      const amenities = this.extractAmenities(property);
+
+      // Extract location
+      const location = this.extractLocation(property);
 
       return {
-        name: hotel.hotel_name || 'Unknown Property',
-        price: Math.round(hotel.min_total_price || 0),
-        rating: hotel.review_score || 0,
-        description: `${hotel.accommodation_type_name || 'Accommodation'} in ${hotel.address || 'destination'}. ${hotel.review_score_word || ''} rated property with ${hotel.review_nr || 0} reviews.`,
-        amenities: this.extractAmenities(hotel),
-        location: hotel.address || 'Location not specified',
-        imageUrl: hotel.main_photo_url,
-        bookingUrl: hotel.url,
-        source: 'booking.com'
+        name: property.name || 'Unknown Property',
+        price: Math.round(pricePerNight),
+        rating: property.overall_rating || 0,
+        description,
+        amenities,
+        location,
+        imageUrl: property.images?.[0]?.original_image || property.images?.[0]?.thumbnail,
+        bookingUrl: property.link,
+        source: 'google_hotels'
       };
     });
   }
 
-  private extractAmenities(hotel: BookingApiResponse['result'][0]): string[] {
+  private buildPropertyDescription(property: SerpApiProperty): string {
+    const parts = [];
+
+    if (property.description) {
+      parts.push(property.description);
+    } else {
+      parts.push(`${property.type || 'Accommodation'} with ${property.reviews || 0} reviews`);
+    }
+
+    if (property.overall_rating) {
+      parts.push(`Rated ${property.overall_rating}/5`);
+    }
+
+    if (property.nearby_places && property.nearby_places.length > 0) {
+      const nearbyPlace = property.nearby_places[0];
+      parts.push(`Near ${nearbyPlace.name}`);
+    }
+
+    return parts.join('. ') + '.';
+  }
+
+  private extractAmenities(property: SerpApiProperty): string[] {
     const amenities: string[] = [];
 
-    // Add amenities based on available data
-    if (hotel.accommodation_type_name) {
-      amenities.push(hotel.accommodation_type_name);
+    // Add SerpApi provided amenities
+    if (property.amenities) {
+      amenities.push(...property.amenities);
     }
 
-    if (hotel.distance_to_cc) {
-      amenities.push(`${hotel.distance_to_cc} from city center`);
+    // Add essential info as amenities
+    if (property.essential_info) {
+      amenities.push(...property.essential_info);
     }
 
-    // Add some common amenities (this could be enhanced with additional API calls)
-    amenities.push('WiFi', 'Reception', 'Room Service');
+    // Add property type
+    if (property.type) {
+      amenities.push(property.type);
+    }
 
-    return amenities;
+    // Add nearby transportation as amenity
+    if (property.nearby_places) {
+      property.nearby_places.forEach(place => {
+        if (place.transportations) {
+          place.transportations.forEach(transport => {
+            amenities.push(`${transport.duration} to ${place.name} by ${transport.type}`);
+          });
+        }
+      });
+    }
+
+    return [...new Set(amenities)]; // Remove duplicates
+  }
+
+  private extractLocation(property: SerpApiProperty): string {
+    // Try to build location from nearby places
+    if (property.nearby_places && property.nearby_places.length > 0) {
+      const primaryLocation = property.nearby_places[0];
+      return `Near ${primaryLocation.name}`;
+    }
+
+    // Fallback to GPS coordinates area description
+    if (property.gps_coordinates) {
+      return `Location: ${property.gps_coordinates.latitude.toFixed(3)}, ${property.gps_coordinates.longitude.toFixed(3)}`;
+    }
+
+    return 'Location details available after booking';
   }
 
   private formatDateForAPI(dateString: string): string | null {
     try {
-      // Handle various input formats and convert to YYYY-MM-DD
       let date: Date;
 
       if (dateString.includes('/')) {
-        // Handle formats like "9/27" or "9/27/2024"
         const parts = dateString.split('/');
         if (parts.length === 2) {
-          // Assume current year if only month/day provided
           const currentYear = new Date().getFullYear();
           date = new Date(currentYear, parseInt(parts[0]) - 1, parseInt(parts[1]));
         } else if (parts.length === 3) {
@@ -233,7 +435,6 @@ export class BookingApiService {
           return null;
         }
       } else {
-        // Try parsing as-is
         date = new Date(dateString);
       }
 
@@ -241,11 +442,44 @@ export class BookingApiService {
         return null;
       }
 
-      // Format as YYYY-MM-DD
       return date.toISOString().split('T')[0];
     } catch (error) {
       console.error('Error formatting date:', error);
       return null;
+    }
+  }
+
+  private logSearchStrategy(searchParams: URLSearchParams, criteria?: TravelCriteria): void {
+    const strategy = [];
+
+    if (searchParams.has('min_price') || searchParams.has('max_price')) {
+      const min = searchParams.get('min_price');
+      const max = searchParams.get('max_price');
+      strategy.push(`Budget: $${min || '0'}-$${max || '∞'} per night`);
+    }
+
+    if (searchParams.has('vacation_rentals')) {
+      strategy.push('Property type: Vacation rentals');
+    } else {
+      strategy.push('Property type: Hotels');
+    }
+
+    if (searchParams.has('rating')) {
+      const rating = searchParams.get('rating');
+      const ratingText = rating === '9' ? '4.5+ stars' : rating === '8' ? '4.0+ stars' : 'Quality rated';
+      strategy.push(`Minimum rating: ${ratingText}`);
+    }
+
+    if (searchParams.has('free_cancellation')) {
+      strategy.push('Free cancellation required');
+    }
+
+    if (criteria?.amenities && criteria.amenities.length > 0) {
+      strategy.push(`Required amenities: ${criteria.amenities.join(', ')}`);
+    }
+
+    if (strategy.length > 0) {
+      this.progressCallback(`Pre-filtering strategy: ${strategy.join(' | ')}`);
     }
   }
 }

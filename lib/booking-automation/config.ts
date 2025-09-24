@@ -1,21 +1,17 @@
 // Configuration for booking automation
 export const AUTOMATION_CONFIG = {
-  // Use real automation only in production or when explicitly enabled
-  useRealSearch: process.env.USE_REAL_BOOKING_SEARCH === 'true' || process.env.NODE_ENV === 'production',
+  // Use real API search only when explicitly enabled
+  useRealSearch: process.env.USE_REAL_BOOKING_SEARCH === 'true',
 
-  // Browser configuration
-  headless: process.env.NODE_ENV === 'production', // headless in production, visible in development
+  // API configuration
+  apiTimeout: 30000, // 30 seconds for API requests
+  searchTimeout: 10 * 60 * 1000, // 10 minutes for complete search process
 
-  // Timeouts (in milliseconds)
-  pageTimeout: 30000,
-  searchTimeout: 20 * 60 * 1000, // 20 minutes for thorough search
-
-  // Limits
-  maxPropertiesPerSite: 8,
+  // Result limits
+  maxPropertiesPerSearch: 8,
   maxTotalProperties: 16,
 
-  // Delays for human-like behavior
-  minActionDelay: 1000,
-  maxActionDelay: 3000,
-  evaluationDelay: 2000,
+  // AI evaluation settings
+  evaluationTimeout: 60000, // 60 seconds per property evaluation
+  maxEvaluationRetries: 2,
 };

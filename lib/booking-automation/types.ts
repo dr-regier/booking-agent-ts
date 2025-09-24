@@ -18,7 +18,7 @@ export interface RawPropertyData {
   location: string;
   imageUrl?: string;
   bookingUrl?: string;
-  source: 'booking.com' | 'airbnb.com' | 'hotels.com' | 'expedia.com';
+  source: 'google_hotels' | 'booking.com' | 'airbnb.com' | 'hotels.com' | 'expedia.com';
 }
 
 export interface PropertyEvaluation {

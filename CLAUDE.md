@@ -14,25 +14,36 @@ This project strictly uses **pnpm**. Do not use npm or yarn.
 
 ## Architecture
 
-This is a TypeScript Next.js 15 starter template for AI-powered applications:
+This is an AI-powered travel booking assistant application built with TypeScript and Next.js 15:
 
 ### Core Stack
 - **Next.js 15** with App Router
-- **AI SDK 5** with OpenAI GPT-5 integration
+- **AI SDK 5** with OpenAI GPT-4o-mini integration
+- **SerpApi** for Google Hotels accommodation data
 - **shadcn/ui** components (New York style, neutral base color)
 - **Tailwind CSS v4** for styling
 
 ### Key Directories
 - `app/` - Next.js App Router pages and API routes
-- `app/api/chat/` - AI chat endpoint using non-streaming `generateText()`
+- `app/api/chat/` - AI chat endpoint for travel conversation
+- `app/api/search-accommodations/` - Streaming accommodation search endpoint
 - `components/ui/` - shadcn/ui components
-- `lib/utils.ts` - Utility functions including `cn()` for className merging
+- `lib/booking-automation/` - SerpApi integration and AI evaluation
+- `lib/utils/` - Utility functions including travel criteria extraction
 
 ### AI Integration
-- Uses AI SDK 5's `generateText()` for non-streaming responses
-- Configured for GPT-5 via OpenAI provider
-- API route at `/api/chat` expects `{ message: string }` and returns `{ response: string }`
+- Uses AI SDK 5's `generateText()` for chat and property evaluation
+- Configured for GPT-4o-mini via OpenAI provider
+- `/api/chat` for natural language travel conversation
+- `/api/search-accommodations` for streaming accommodation search with AI evaluation
 - Requires `OPENAI_API_KEY` in `.env.local`
+
+### Accommodation Search Integration
+- **SerpApi Google Hotels** for real-time accommodation data
+- **Smart pre-filtering** by budget, property type, rating, amenities
+- **Dual-mode architecture**: Mock mode (default) and production mode
+- **AI-powered evaluation** and ranking of properties
+- Requires `SERPAPI_API_KEY` for production mode
 
 ### UI Components
 - **shadcn/ui** configured with:
@@ -55,4 +66,6 @@ This is a TypeScript Next.js 15 starter template for AI-powered applications:
 Create `.env.local` with:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
+SERPAPI_API_KEY=your_serpapi_key_here
+USE_REAL_BOOKING_SEARCH=true  # Optional: enables production mode
 ```
