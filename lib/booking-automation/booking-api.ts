@@ -127,6 +127,10 @@ export class SerpApiService {
     searchParams.append('api_key', this.apiKey);
     searchParams.append('engine', 'google_hotels');
 
+    // Request image data specifically
+    searchParams.append('images', 'true');
+    searchParams.append('hotel_details', 'true');
+
     // Improve search query for better results
     let searchQuery = params.destination;
     if (searchQuery.toLowerCase().includes('new york') && !searchQuery.toLowerCase().includes('city')) {
@@ -316,9 +320,28 @@ export class SerpApiService {
     console.log('✅ SerpApi Response received:', {
       hasProperties: !!data.properties,
       propertyCount: data.properties?.length || 0,
+      hasAds: !!data.ads,
+      adsCount: data.ads?.length || 0,
       hasError: !!data.error,
+      responseKeys: Object.keys(data),
       searchMetadata: data.search_metadata
     });
+
+    // Enhanced logging for first property to understand structure
+    const firstProperty = data.properties?.[0] || data.ads?.[0];
+    if (firstProperty) {
+      console.log('🏨 First property structure:', {
+        name: firstProperty.name,
+        hasImages: !!firstProperty.images,
+        imagesCount: firstProperty.images?.length,
+        hasThumbnail: !!firstProperty.thumbnail,
+        hasMainPhoto: !!firstProperty.main_photo_url,
+        hasPhoto: !!firstProperty.photo,
+        hasPhotos: !!firstProperty.photos,
+        imageKeys: firstProperty.images ? Object.keys(firstProperty.images[0] || {}) : [],
+        allKeys: Object.keys(firstProperty).filter(k => k.toLowerCase().includes('photo') || k.toLowerCase().includes('image') || k.toLowerCase().includes('thumb'))
+      });
+    }
 
     // Check both properties and ads arrays for hotel data
     const hotels = data.properties || data.ads || [];
@@ -440,12 +463,19 @@ export class SerpApiService {
   }
 
   private extractImageUrl(property: SerpApiProperty, propertyIndex: number): string | undefined {
-    // Priority order for image extraction
+    // Priority order for image extraction - checking all possible sources
     const imageSources = [
       property.thumbnail,                              // From ads array
       property.images?.[0]?.original_image,           // High quality from properties
       property.images?.[0]?.thumbnail,                // Lower quality from properties
+      property.images?.[0]?.source_url,               // Alternative image URL
       property.main_photo_url,                        // Alternative field name
+      property.photo?.thumbnail,                      // Alternative structure
+      property.photo?.original,                       // Alternative structure
+      property.photos?.[0]?.thumbnail,                // Multiple photos array
+      property.photos?.[0]?.original,                 // Multiple photos array
+      // Try any nested image data
+      ...(property.images || []).slice(1, 3).map(img => img.thumbnail || img.original_image),
     ].filter(Boolean); // Remove undefined/null values
 
     const selectedImage = imageSources[0];
@@ -454,10 +484,26 @@ export class SerpApiService {
       thumbnail: !!property.thumbnail,
       originalImage: !!property.images?.[0]?.original_image,
       thumbnailFromImages: !!property.images?.[0]?.thumbnail,
+      sourceUrl: !!property.images?.[0]?.source_url,
       mainPhotoUrl: !!property.main_photo_url,
+      photoThumbnail: !!property.photo?.thumbnail,
+      photoOriginal: !!property.photo?.original,
+      photosArray: !!property.photos?.[0],
+      imagesCount: property.images?.length || 0,
+      totalSources: imageSources.length,
       selectedImage: selectedImage ? 'Found' : 'None',
-      selectedUrl: selectedImage?.substring(0, 60) + '...'
+      selectedUrl: selectedImage ? selectedImage.substring(0, 60) + '...' : 'None'
     });
+
+    // If no image found, provide a fallback based on property name/location
+    if (!selectedImage) {
+      console.log(`⚠️ No image found for ${property.name}, using fallback strategy`);
+      // You could add fallback logic here, such as:
+      // - Generic hotel placeholder images
+      // - Images based on location/chain
+      // - Default placeholder URL
+      return undefined; // Let UI handle placeholder
+    }
 
     return selectedImage;
   }
