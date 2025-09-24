@@ -2,10 +2,13 @@ import { BookingSearchParams, RawPropertyData, ProgressCallback } from './types'
 import type { TravelCriteria } from '@/lib/types/travel';
 
 interface SerpApiProperty {
-  type: string;
+  type?: string;
   name: string;
   description?: string;
   link?: string;
+  // Fields from ads array
+  extracted_price?: number;
+  price?: string;
   gps_coordinates?: {
     latitude: number;
     longitude: number;
@@ -120,7 +123,13 @@ export class SerpApiService {
     // Required parameters
     searchParams.append('api_key', this.apiKey);
     searchParams.append('engine', 'google_hotels');
-    searchParams.append('q', params.destination);
+
+    // Improve search query for better results
+    let searchQuery = params.destination;
+    if (searchQuery.toLowerCase().includes('new york') && !searchQuery.toLowerCase().includes('city')) {
+      searchQuery = searchQuery.replace(/new york.*new york/i, 'New York City');
+    }
+    searchParams.append('q', searchQuery);
     searchParams.append('currency', 'USD');
 
     // Date parameters
@@ -279,32 +288,50 @@ export class SerpApiService {
   private async executeSearch(searchParams: URLSearchParams): Promise<RawPropertyData[]> {
     this.progressCallback('Executing pre-filtered search via Google Hotels...');
 
-    const response = await fetch(`${this.baseUrl}?${searchParams}`, {
+    const requestUrl = `${this.baseUrl}?${searchParams}`;
+    console.log('🔍 SerpApi Request URL:', requestUrl);
+    console.log('🔑 API Key configured:', !!this.apiKey);
+    console.log('📋 Search Parameters:', Object.fromEntries(searchParams));
+
+    const response = await fetch(requestUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     });
 
+    console.log('📡 SerpApi Response Status:', response.status, response.statusText);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('SerpApi search failed:', response.status, errorText);
-      throw new Error(`SerpApi search failed: ${response.status}`);
+      console.error('❌ SerpApi search failed:', response.status, response.statusText);
+      console.error('❌ Error response body:', errorText);
+      throw new Error(`SerpApi search failed: ${response.status} - ${errorText}`);
     }
 
     const data: SerpApiResponse = await response.json();
+    console.log('✅ SerpApi Response received:', {
+      hasProperties: !!data.properties,
+      propertyCount: data.properties?.length || 0,
+      hasError: !!data.error,
+      searchMetadata: data.search_metadata
+    });
 
-    if (!data.properties || data.properties.length === 0) {
+    // Check both properties and ads arrays for hotel data
+    const hotels = data.properties || data.ads || [];
+
+    if (!hotels || hotels.length === 0) {
+      console.log('⚠️ No hotels in response. Full response structure:', JSON.stringify(data, null, 2));
       this.progressCallback('No properties found with current filters. Try broadening your criteria.');
       return [];
     }
 
-    console.log(`SerpApi returned ${data.properties.length} properties`);
+    console.log(`SerpApi returned ${hotels.length} hotels (from ${data.properties ? 'properties' : 'ads'} array)`);
 
     // Log price range for debugging
-    if (data.properties.length > 0) {
-      const prices = data.properties
-        .map(p => p.rate_per_night?.extracted_lowest || p.total_rate?.extracted_lowest)
+    if (hotels.length > 0) {
+      const prices = hotels
+        .map(p => p.rate_per_night?.extracted_lowest || p.total_rate?.extracted_lowest || p.extracted_price)
         .filter(p => p && p > 0) as number[];
 
       if (prices.length > 0) {
@@ -317,17 +344,18 @@ export class SerpApiService {
       }
     }
 
-    return this.convertSerpApiResults(data.properties);
+    return this.convertSerpApiResults(hotels);
   }
 
   private convertSerpApiResults(properties: SerpApiProperty[]): RawPropertyData[] {
     return properties.slice(0, 8).map((property, index) => {
       this.progressCallback(`Processing property ${index + 1}: ${property.name}`);
 
-      // Extract price (prefer per-night rate)
+      // Extract price (handle both properties and ads structures)
       const pricePerNight = property.rate_per_night?.extracted_lowest ||
                            property.rate_per_night?.extracted_before_taxes_fees ||
-                           property.total_rate?.extracted_lowest || 0;
+                           property.total_rate?.extracted_lowest ||
+                           property.extracted_price || 0;
 
       // Build description
       const description = this.buildPropertyDescription(property);
