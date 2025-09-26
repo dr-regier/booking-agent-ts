@@ -24,26 +24,38 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 ### Core Stack
 - **Next.js 15** with App Router
 - **AI SDK 5** with OpenAI GPT-4o-mini integration
+- **SerpApi** for Google Hotels accommodation data
 - **shadcn/ui** components (New York style, neutral base color)
 - **Tailwind CSS v4** for styling
 
 ### Key Directories
 - `app/` - Next.js App Router pages and API routes
 - `app/api/chat/` - AI chat endpoint for travel conversation
+- `app/api/search-accommodations/` - Streaming accommodation search endpoint
 - `components/ui/` - shadcn/ui components
 - `components/ai-elements/` - AI chat interface components
+- `lib/booking-automation/` - SerpApi integration and AI evaluation
+- `lib/utils/` - Utility functions including travel criteria extraction
 
 ### AI Integration
-- Uses AI SDK 5's `generateText()` for travel chat responses
+- Uses AI SDK 5's `generateText()` for travel chat responses and property evaluation
 - Configured for GPT-4o-mini via OpenAI provider
 - `/api/chat` for natural language travel conversation and advice
+- `/api/search-accommodations` for streaming accommodation search with AI evaluation
 - Requires `OPENAI_API_KEY` in `.env.local`
+
+### Accommodation Search Integration
+- **SerpApi Google Hotels** for real-time accommodation data
+- **Smart pre-filtering** by budget, property type, rating, amenities
+- **Dual-mode architecture**: Mock mode (default) and production mode
+- **AI-powered evaluation** and ranking of properties
+- Requires `SERPAPI_API_KEY` for production mode
 
 ### UI Components
 - **shadcn/ui** configured with:
   - New York style
   - Neutral base color with CSS variables
-  - Import aliases: `@/components`, `@/components/ui`
+  - Import aliases: `@/components`, `@/lib/utils`, `@/components/ui`
   - Lucide React for icons
 - **AI Elements** from Vercel:
   - Pre-built components for AI applications
@@ -60,13 +72,17 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 Create `.env.local` with:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
+SERPAPI_API_KEY=your_serpapi_key_here
+USE_REAL_BOOKING_SEARCH=true  # Optional: enables production mode
 ```
 
 ## Travel Assistant Features
 
-This application provides AI-powered travel advice and recommendations including:
+This application provides AI-powered travel advice and accommodation search including:
 - Destination suggestions and recommendations
 - Travel tips and local insights
 - Weather and seasonal travel advice
 - Cultural information and travel planning guidance
 - Best times to visit various destinations
+- Smart accommodation search with SerpApi integration
+- AI-powered property evaluation and ranking
