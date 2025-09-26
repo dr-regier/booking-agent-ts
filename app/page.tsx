@@ -1,12 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import {
-  PromptInput,
-  PromptInputBody,
-  PromptInputTextarea,
-  PromptInputSubmit,
-} from "@/components/ai-elements/prompt-input";
+import { useEffect, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TravelSummary } from "@/components/travel-summary";
@@ -31,92 +25,121 @@ interface AccommodationResult {
 export default function Home() {
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [lastMessageId, setLastMessageId] = useState<string | null>(null);
-
-  // Keep only the last 10 messages to reduce context size
-  const limitedMessages = messages.slice(-10);
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [travelCriteria, setTravelCriteria] = useState<TravelCriteria>({});
   const [searchResults, setSearchResults] = useState<AccommodationResult[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Keep only the last 10 messages to reduce context size
+  const limitedMessages = messages.slice(-10);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [limitedMessages, isLoading]);
 
-  const handleSubmit = async (
-    message: { text?: string; files?: any[] },
-    event: React.FormEvent
-  ) => {
-    if (!message.text?.trim() || isLoading) return;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!input.trim() || isLoading) return;
 
     const userMessage: UIMessage = {
       id: Date.now().toString(),
       role: "user",
-      parts: [{ type: "text", text: message.text }],
+      parts: [{ type: "text", text: input }],
     };
+
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
+    setError(null);
 
-    // Reset form immediately after adding message
-    (event.target as HTMLFormElement).reset();
-
-    // Extract travel criteria from user message
-    const extractedCriteria = extractTravelCriteria(message.text);
-    const extractedEnhanced = extractEnhancedCriteria(message.text, extractedCriteria);
+    // Extract travel criteria from user input
+    const extractedCriteria = extractTravelCriteria(input);
+    const extractedEnhanced = extractEnhancedCriteria(input, extractedCriteria);
 
     setTravelCriteria((prev) => {
       const mergedBasic = mergeTravelCriteria(prev, extractedCriteria);
       return mergeEnhancedCriteria(mergedBasic, extractedEnhanced);
     });
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    const currentInput = input;
+    setInput("");
 
+    try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: message.text,
+          message: currentInput,
           messageHistory: limitedMessages.map(msg => ({
             role: msg.role,
             content: msg.parts.find(part => part.type === 'text')?.text || ''
           }))
         }),
-        signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
-      const data = await response.json();
-
-      if (response.ok) {
-        const assistantMessage: UIMessage = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          parts: [{ type: "text", text: formatAIResponse(data.response) }],
-        };
-        setLastMessageId(assistantMessage.id);
-        setMessages((prev) => [...prev, assistantMessage]);
-      } else {
-        throw new Error(data.error || "Failed to get response");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      let errorContent = "Sorry, I encountered an error. Please try again.";
-
-      if (error instanceof Error && error.name === 'AbortError') {
-        errorContent = "The request timed out. Please try again with a shorter message.";
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const errorMessage: UIMessage = {
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("No response body");
+      }
+
+      const decoder = new TextDecoder();
+      let streamedContent = "";
+
+      // Create an assistant message for streaming
+      const assistantMessage: UIMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        parts: [{ type: "text", text: errorContent }],
+        parts: [{ type: "text", text: "" }],
       };
-      setMessages((prev) => [...prev, errorMessage]);
+
+      setLastMessageId(assistantMessage.id);
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          streamedContent += chunk;
+
+          // Update the assistant message with the streamed content
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessage.id
+                ? { ...msg, parts: [{ type: "text", text: formatAIResponse(streamedContent) }] }
+                : msg
+            )
+          );
+        }
+      } catch (streamError) {
+        console.error("Streaming error:", streamError);
+        throw new Error("Failed to read response stream");
+      }
+
+    } catch (fetchError) {
+      console.error("Error:", fetchError);
+      setError(fetchError instanceof Error ? fetchError.message : "Failed to get response");
+
+      // Remove the user message on error
+      setMessages((prev) => prev.slice(0, -1));
+      setInput(currentInput); // Restore input
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRetry = () => {
+    if (error && input) {
+      setError(null);
+      handleSubmit(new Event('submit') as any);
     }
   };
 
@@ -231,6 +254,22 @@ export default function Home() {
                       </div>
                     </div>
                   )}
+                  {error && (
+                    <div className="flex justify-start">
+                      <div className="max-w-2xl bg-red-50 border-red-200 text-red-800 rounded-2xl shadow-lg border p-4 space-y-3">
+                        <p className="text-sm font-medium">Sorry, I encountered an error:</p>
+                        <p className="text-xs text-red-600">{error}</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleRetry}
+                            className="text-xs bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-md transition-colors"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
               {/* Invisible element to scroll to */}
@@ -241,27 +280,25 @@ export default function Home() {
           {/* Input area pinned to bottom */}
           <div className="flex-shrink-0 bg-white border-t border-gray-200 rounded-b-3xl">
             <div className="max-w-4xl mx-auto p-4">
-              <div className="flex items-center bg-white rounded-2xl shadow-lg border-2 border-gray-300 transition-all duration-200 hover:shadow-xl travel-input-container pl-4 pr-2 py-2">
-                <PromptInput onSubmit={handleSubmit} className="flex-1 border-none shadow-none rounded-none bg-transparent">
-                  <PromptInputBody className="flex-row items-center">
-                    <PromptInputTextarea
-                      placeholder="Ask me about destinations, travel tips, or help finding accommodations..."
-                      className="flex-1 min-h-0 h-10 resize-none border-none p-0 shadow-none outline-none ring-0 focus-visible:ring-0 bg-transparent"
-                    />
-                  </PromptInputBody>
-                </PromptInput>
-                <PromptInputSubmit
-                  form={undefined}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const form = e.currentTarget.closest('form') || document.querySelector('form');
-                    if (form) form.requestSubmit();
-                  }}
-                  status={isLoading ? "submitted" : undefined}
-                  className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex-shrink-0 ml-2"
-                  size="icon"
+              <form onSubmit={handleSubmit} className="flex items-center bg-white rounded-2xl shadow-lg border-2 border-gray-300 transition-all duration-200 hover:shadow-xl travel-input-container pl-4 pr-2 py-2">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask me about destinations, travel tips, or help finding accommodations..."
+                  className="flex-1 min-h-0 h-10 resize-none border-none p-0 shadow-none outline-none ring-0 focus-visible:ring-0 bg-transparent"
+                  disabled={isLoading}
                 />
-              </div>
+                <button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex-shrink-0 ml-2 p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </form>
             </div>
           </div>
         </div>

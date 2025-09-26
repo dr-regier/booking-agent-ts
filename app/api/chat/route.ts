@@ -1,19 +1,39 @@
 import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-import { NextRequest, NextResponse } from 'next/server';
+import { streamText } from 'ai';
+import { NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     const { message, messageHistory = [] } = await request.json();
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return new Response(
+        JSON.stringify({ error: 'Message is required and must be a non-empty string' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate message history structure
+    if (!Array.isArray(messageHistory)) {
+      return new Response(
+        JSON.stringify({ error: 'Message history must be an array' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     // Limit message history to last 10 messages for performance
     const recentHistory = messageHistory.slice(-10);
 
-    const { text } = await generateText({
+    // Validate message history items
+    const validHistory = recentHistory.filter(msg =>
+      msg &&
+      typeof msg === 'object' &&
+      typeof msg.role === 'string' &&
+      typeof msg.content === 'string' &&
+      (msg.role === 'user' || msg.role === 'assistant')
+    );
+
+    const result = await streamText({
       model: openai('gpt-4o-mini'),
       temperature: 0.7,
       system: `You are a friendly and professional Travel Assistant. Your role is to help users with all aspects of travel planning - from destination recommendations and travel advice to finding perfect accommodations when they're ready to book.
@@ -56,23 +76,49 @@ export async function POST(request: NextRequest) {
 
 Remember: You're a comprehensive travel professional who makes both destination planning and accommodation booking enjoyable and stress-free!`,
       messages: [
-        ...recentHistory.map((msg: any) => ({
-          role: msg.role,
-          content: msg.content
-        })),
+        ...validHistory,
         {
           role: 'user',
-          content: message
+          content: message.trim()
         }
       ]
     });
 
-    return NextResponse.json({ response: text });
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate response' },
-      { status: 500 }
+
+    // Handle specific error types
+    if (error instanceof Error) {
+      // Network or API errors
+      if (error.message.includes('network') || error.message.includes('timeout')) {
+        return new Response(
+          JSON.stringify({ error: 'Network error. Please check your connection and try again.' }),
+          { status: 503, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Rate limiting errors
+      if (error.message.includes('rate limit') || error.message.includes('429')) {
+        return new Response(
+          JSON.stringify({ error: 'Service is temporarily unavailable. Please try again in a moment.' }),
+          { status: 429, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Authentication errors
+      if (error.message.includes('auth') || error.message.includes('unauthorized')) {
+        return new Response(
+          JSON.stringify({ error: 'Configuration error. Please contact support.' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Generic error fallback
+    return new Response(
+      JSON.stringify({ error: 'Failed to generate response. Please try again.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
