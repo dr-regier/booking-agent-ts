@@ -35,12 +35,15 @@ export class WeatherService {
       url.searchParams.append('appid', this.apiKey);
       url.searchParams.append('units', 'metric'); // Celsius by default
 
+      console.log('Making weather API request to:', url.toString());
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
         },
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       });
+      console.log('Weather API response status:', response.status);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -58,7 +61,7 @@ export class WeatherService {
       const data = await response.json() as OpenWeatherMapResponse | WeatherApiError;
 
       // Check if response contains error
-      if ('cod' in data && data.cod !== '200') {
+      if ('cod' in data && data.cod !== 200) {
         throw new Error(data.message || 'Weather data unavailable');
       }
 
@@ -79,6 +82,7 @@ export class WeatherService {
         icon: weatherResponse.weather[0].icon,
         timestamp: Date.now(),
       };
+      console.log('Processed weather data:', weatherData);
 
       // Cache the result
       weatherCache.set(cacheKey, {

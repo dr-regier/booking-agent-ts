@@ -130,8 +130,20 @@ export default function Home() {
                   break;
                 }
                 const data = JSON.parse(jsonStr);
+                    // console.log('Streaming event received:', data); // Debug disabled
                 if (data.type === 'text-delta' && data.delta) {
                   streamedContent += data.delta;
+                } else if (data.type === 'tool-output-available') {
+                  // Handle tool output events
+                  // console.log('Tool output event full details:', JSON.stringify(data, null, 2)); // Debug disabled
+                  // Check if this is a weather tool result by looking at the output structure
+                  if (data.output && (data.output.success !== undefined || data.output.location || data.output.data)) {
+                    // console.log('Weather tool output detected:', data.output); // Debug disabled
+                    toolResults.push({
+                      toolName: 'getWeather',
+                      result: data.output
+                    });
+                  }
                 }
               } catch (e) {
                 console.debug('Could not parse streaming data:', line, e);
@@ -303,20 +315,6 @@ export default function Home() {
                         </div>
                       </div>
                     ))
-                  )}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="max-w-2xl bg-white/95 border-gray-200 text-gray-800 rounded-2xl shadow-lg border p-4">
-                        <div className="flex items-center space-x-2">
-                          <div className="animate-pulse text-blue-600">Thinking...</div>
-                          <div className="flex space-x-1">
-                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
-                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   )}
                   {error && (
                     <div className="flex justify-start">

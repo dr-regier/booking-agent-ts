@@ -11,10 +11,13 @@ export const weatherTool = tool({
     city: z.string().describe('The city or destination name to get weather information for. Can include country for disambiguation (e.g., "Paris, France")'),
   }),
   execute: async ({ city }) => {
+    console.log('Weather tool called for city:', city);
     try {
+      console.log('Fetching weather data...');
       const weatherData = await weatherService.getCurrentWeather(city);
+      console.log('Weather data received:', weatherData);
 
-      return {
+      const result = {
         success: true,
         data: {
           location: `${weatherData.city}, ${weatherData.country}`,
@@ -28,16 +31,20 @@ export const weatherTool = tool({
           timestamp: new Date(weatherData.timestamp).toISOString(),
         },
       };
+      console.log('Weather tool returning success result:', result);
+      return result;
     } catch (error) {
       console.error('Weather tool error:', error);
 
       // Return graceful fallback instead of throwing
-      return {
+      const errorResult = {
         success: false,
         error: 'Weather data is temporarily unavailable. Please try again later.',
         city: city,
         fallback: true,
       };
+      console.log('Weather tool returning error result:', errorResult);
+      return errorResult;
     }
   },
 });
