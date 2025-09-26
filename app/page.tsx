@@ -2,42 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
-  Conversation,
-  ConversationContent,
-  ConversationEmptyState,
-} from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageAvatar,
-} from "@/components/ai-elements/message";
-import {
   PromptInput,
   PromptInputBody,
   PromptInputTextarea,
-  PromptInputToolbar,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import type { UIMessage } from "ai";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { TravelSummary } from "@/components/travel-summary";
-import { SearchAccommodations } from "@/components/search-accommodations";
-import { SearchResults } from "@/components/search-results";
-import type { TravelCriteria } from "@/lib/types/travel";
-import { extractTravelCriteria, mergeTravelCriteria } from "@/lib/utils/travel-extractor";
-import { extractEnhancedCriteria, mergeEnhancedCriteria } from "@/lib/utils/enhanced-extractor";
-import { formatAIResponse } from "@/lib/utils/format-response";
 import { FormattedMessage } from "@/components/formatted-message";
-
-interface AccommodationResult {
-  id: string;
-  name: string;
-  price: number;
-  rating: number;
-  description: string;
-  amenities: string[];
-  location: string;
-}
 
 export default function Home() {
   const [messages, setMessages] = useState<UIMessage[]>([]);
@@ -46,15 +18,12 @@ export default function Home() {
   // Keep only the last 10 messages to reduce context size
   const limitedMessages = messages.slice(-10);
   const [isLoading, setIsLoading] = useState(false);
-  const [travelCriteria, setTravelCriteria] = useState<TravelCriteria>({});
-  const [searchResults, setSearchResults] = useState<AccommodationResult[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [limitedMessages, isLoading]);
-
 
   const handleSubmit = async (
     message: { text?: string; files?: any[] },
@@ -72,15 +41,6 @@ export default function Home() {
 
     // Reset form immediately after adding message
     (event.target as HTMLFormElement).reset();
-
-    // Extract travel criteria from user message
-    const extractedCriteria = extractTravelCriteria(message.text);
-    const extractedEnhanced = extractEnhancedCriteria(message.text, extractedCriteria);
-
-    setTravelCriteria((prev) => {
-      const mergedBasic = mergeTravelCriteria(prev, extractedCriteria);
-      return mergeEnhancedCriteria(mergedBasic, extractedEnhanced);
-    });
 
     try {
       const controller = new AbortController();
@@ -106,7 +66,7 @@ export default function Home() {
         const assistantMessage: UIMessage = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          parts: [{ type: "text", text: formatAIResponse(data.response) }],
+          parts: [{ type: "text", text: data.response }],
         };
         setLastMessageId(assistantMessage.id);
         setMessages((prev) => [...prev, assistantMessage]);
@@ -136,14 +96,14 @@ export default function Home() {
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning! Ready to plan your next adventure?";
-    if (hour < 17) return "Good afternoon! Let's find your perfect getaway.";
-    return "Good evening! Where shall we explore tonight?";
+    if (hour < 17) return "Good afternoon! Let's explore the world together.";
+    return "Good evening! Where shall we discover tonight?";
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-blue-100 flex max-w-7xl mx-auto gap-4 p-4 animate-in fade-in duration-700">
-      {/* Main chat area */}
-      <div className="flex-1 flex flex-col h-full bg-white/95 rounded-3xl shadow-2xl border border-gray-200/50 animate-in slide-in-from-left duration-500 delay-100">
+    <div className="h-screen bg-gradient-to-br from-blue-50 via-teal-50 to-blue-100 max-w-6xl mx-auto p-4 animate-in fade-in duration-700">
+      {/* Main chat area - now full width */}
+      <div className="flex flex-col h-full bg-white/95 rounded-3xl shadow-2xl border border-gray-200/50 animate-in slide-in-from-bottom duration-500">
         {/* Enhanced Travel-Themed Header */}
         <div className="bg-gradient-to-r from-blue-600 to-teal-500 border-b border-blue-500/20 p-4 flex items-center justify-between flex-shrink-0 rounded-t-3xl relative overflow-hidden">
           {/* Animated Background Elements */}
@@ -161,7 +121,7 @@ export default function Home() {
 
           <div className="relative z-10">
             <h1 className="text-xl font-bold text-white drop-shadow-lg transition-all duration-300 hover:text-blue-100 cursor-default">
-              Travel Booking Assistant
+              Travel Assistant
             </h1>
             <p className="text-blue-100 text-xs font-medium mt-0.5">
               {getTimeBasedGreeting()}
@@ -174,71 +134,66 @@ export default function Home() {
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-4xl mx-auto px-4 py-2 space-y-3">
-              {/* Show search results if they exist */}
-              {searchResults.length > 0 ? (
-                <SearchResults
-                  results={searchResults}
-                  onClear={() => setSearchResults([])}
-                />
+              {limitedMessages.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200 space-y-6 max-w-lg mx-auto">
+                    <div className="text-4xl text-center">🌍</div>
+                    <h3 className="font-semibold text-xl text-gray-800 text-center">Welcome to your Travel Assistant!</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed text-center">
+                      I'm here to help you explore the world! Ask me about destinations, travel tips,
+                      weather, local culture, best times to visit, or anything travel-related.
+                      Let's plan your perfect adventure together!
+                    </p>
+                    <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        Destination Advice
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
+                        Travel Tips
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Local Insights
+                      </span>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <>
-                  {limitedMessages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                      <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200 space-y-4 max-w-md mx-auto">
-                        <div className="text-3xl text-center">🌍</div>
-                        <h3 className="font-semibold text-lg text-gray-800 text-center">Welcome to your Travel Assistant!</h3>
-                        <p className="text-gray-600 text-sm leading-relaxed text-center">
-                          I'm here to help you discover and book the perfect accommodations for your journey.
-                          Share your destination, dates, number of guests, and budget to get started.
-                        </p>
-                        <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                            Personalized Search
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
-                            AI-Powered Recommendations
-                          </span>
-                        </div>
+                limitedMessages.map((message, index) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className={`max-w-2xl rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                      message.role === 'user'
+                        ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
+                        : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
+                    } p-4 group`}>
+                      <FormattedMessage
+                        content={message.parts.find(part => part.type === 'text')?.text || ''}
+                        role={message.role}
+                        isNew={message.role === 'assistant' && message.id === lastMessageId}
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="max-w-2xl bg-white/95 border-gray-200 text-gray-800 rounded-2xl shadow-lg border p-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-pulse text-blue-600">Thinking...</div>
+                      <div className="flex space-x-1">
+                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
+                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                       </div>
                     </div>
-                  ) : (
-                    limitedMessages.map((message, index) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
-                        <div className={`max-w-2xl rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
-                          message.role === 'user'
-                            ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
-                            : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
-                        } p-4 group`}>
-                          <FormattedMessage
-                            content={message.parts.find(part => part.type === 'text')?.text || ''}
-                            role={message.role}
-                            isNew={message.role === 'assistant' && message.id === lastMessageId}
-                          />
-                        </div>
-                      </div>
-                    ))
-                  )}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="max-w-2xl bg-white/95 border-gray-200 text-gray-800 rounded-2xl shadow-lg border p-4">
-                        <div className="flex items-center space-x-2">
-                          <div className="animate-pulse text-blue-600">Thinking...</div>
-                          <div className="flex space-x-1">
-                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
-                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                            <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
+                  </div>
+                </div>
               )}
               {/* Invisible element to scroll to */}
               <div ref={messagesEndRef} />
@@ -252,7 +207,7 @@ export default function Home() {
                 <PromptInput onSubmit={handleSubmit} className="flex-1 border-none shadow-none rounded-none bg-transparent">
                   <PromptInputBody className="flex-row items-center">
                     <PromptInputTextarea
-                      placeholder="Tell me about your travel plans..."
+                      placeholder="Ask me about destinations, travel tips, weather, or anything travel-related..."
                       className="flex-1 min-h-0 h-10 resize-none border-none p-0 shadow-none outline-none ring-0 focus-visible:ring-0 bg-transparent"
                     />
                   </PromptInputBody>
@@ -272,21 +227,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Travel summary sidebar - fixed height with scroll */}
-      <div className="w-72 h-full bg-white/95 rounded-3xl shadow-2xl border border-gray-200/50 p-4 space-y-4 overflow-y-auto animate-in slide-in-from-right duration-500 delay-200">
-        <div className="animate-in fade-in duration-500 delay-300">
-          <TravelSummary criteria={travelCriteria} />
-        </div>
-
-        <div className="animate-in fade-in duration-500 delay-400">
-          <SearchAccommodations
-            criteria={travelCriteria}
-            onSearchResults={setSearchResults}
-          />
-        </div>
-
       </div>
     </div>
   );
