@@ -21,19 +21,21 @@ export async function POST(request: NextRequest) {
     const lastMessage = messages[messages.length - 1];
     const userMessage = lastMessage?.parts?.[0]?.text || '';
     
-    // Improved city detection - look for specific weather-related patterns
+    // Improved city detection - extract just the city name, not extra words
     const weatherPatterns = [
-      /(?:weather in|what's.*weather.*in|how's.*weather.*in|weather for)\s+([A-Za-z\s,]+?)(?:\?|$)/i,
-      /^(?:what's the weather in|how's the weather in|weather in)\s+([A-Za-z\s,]+?)(?:\?|$)/i,
-      /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*,\s*[A-Z][a-z]+)?\s*weather\b/i,
-      /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*,\s*[A-Z][a-z]+)?\?*$/i // Single city name
+      /(?:weather in|what's.*weather.*in|how's.*weather.*in|weather for)\s+([A-Za-z\s,]+?)(?:\s+(?:right now|now|today|currently)|\?|$)/i,
+      /^(?:what's the weather in|how's the weather in|weather in)\s+([A-Za-z\s,]+?)(?:\s+(?:right now|now|today|currently)|\?|$)/i,
+      /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*,\s*[A-Z][a-z]+)?\s+weather\b/i,
+      /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*,\s*[A-Z][a-z]+)?(?:\s+(?:right now|now|today|currently))?\?*$/i
     ];
     
     let cityMentioned = null;
     for (const pattern of weatherPatterns) {
       const match = pattern.exec(userMessage.trim());
       if (match && match[1]) {
-        const city = match[1].trim();
+        let city = match[1].trim();
+        // Clean up the city name - remove common time indicators
+        city = city.replace(/\s+(right now|now|today|currently)$/i, '').trim();
         // Basic validation - city should be at least 2 chars and not common greetings
         if (city.length >= 2 && !['hello', 'hi', 'hey', 'thanks', 'thank'].includes(city.toLowerCase())) {
           cityMentioned = [null, city]; // Format to match original structure
