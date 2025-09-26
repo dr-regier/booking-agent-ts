@@ -31,10 +31,12 @@ export const weatherTool = tool({
     } catch (error) {
       console.error('Weather tool error:', error);
 
+      // Return graceful fallback instead of throwing
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to get weather information',
+        error: 'Weather data is temporarily unavailable. Please try again later.',
         city: city,
+        fallback: true,
       };
     }
   },

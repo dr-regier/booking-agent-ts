@@ -81,11 +81,7 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: currentInput,
-          messageHistory: limitedMessages.map(msg => ({
-            role: msg.role,
-            content: msg.parts.find(part => part.type === 'text')?.text || ''
-          }))
+          messages: [...limitedMessages, userMessage]
         }),
       });
 
@@ -119,17 +115,26 @@ export default function Home() {
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
+          
 
           // Split chunk by lines to handle streaming data
           const lines = chunk.split('\n').filter(line => line.trim());
+          
 
           for (const line of lines) {
-            if (line.startsWith('0:')) {
+            if (line.startsWith('data: ')) {
               // Text content
-              const textPart = line.substring(2);
-              if (textPart && textPart !== '"') {
-                const cleanText = textPart.replace(/^"|"$/g, '');
-                streamedContent += cleanText;
+              const jsonStr = line.substring(6); // Remove "data: " prefix
+              try {
+                if (jsonStr === '[DONE]') {
+                  break;
+                }
+                const data = JSON.parse(jsonStr);
+                if (data.type === 'text-delta' && data.delta) {
+                  streamedContent += data.delta;
+                }
+              } catch (e) {
+                console.debug('Could not parse streaming data:', line, e);
               }
             } else if (line.startsWith('c:')) {
               // Tool calls - parse and handle tool results
@@ -148,6 +153,7 @@ export default function Home() {
             }
           }
 
+          
           // Update the assistant message with the streamed content and tool results
           setMessages((prev) =>
             prev.map((msg) =>
