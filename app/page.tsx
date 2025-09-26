@@ -11,6 +11,8 @@ import { extractTravelCriteria, mergeTravelCriteria } from "@/lib/utils/travel-e
 import { extractEnhancedCriteria, mergeEnhancedCriteria } from "@/lib/utils/enhanced-extractor";
 import { formatAIResponse } from "@/lib/utils/format-response";
 import { FormattedMessage } from "@/components/formatted-message";
+import { WeatherWidget } from "@/components/weather-widget";
+import type { WeatherToolResult } from "@/lib/tools/weather-tool";
 
 interface AccommodationResult {
   id: string;
@@ -20,6 +22,13 @@ interface AccommodationResult {
   description: string;
   amenities: string[];
   location: string;
+}
+
+interface ExtendedUIMessage extends UIMessage {
+  toolResults?: {
+    toolName: string;
+    result: any;
+  }[];
 }
 
 export default function Home() {
@@ -91,16 +100,18 @@ export default function Home() {
 
       const decoder = new TextDecoder();
       let streamedContent = "";
+      let toolResults: {toolName: string; result: any}[] = [];
 
       // Create an assistant message for streaming
-      const assistantMessage: UIMessage = {
+      const assistantMessage: ExtendedUIMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         parts: [{ type: "text", text: "" }],
+        toolResults: [],
       };
 
       setLastMessageId(assistantMessage.id);
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage as UIMessage]);
 
       try {
         while (true) {
@@ -108,13 +119,44 @@ export default function Home() {
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          streamedContent += chunk;
 
-          // Update the assistant message with the streamed content
+          // Split chunk by lines to handle streaming data
+          const lines = chunk.split('\n').filter(line => line.trim());
+
+          for (const line of lines) {
+            if (line.startsWith('0:')) {
+              // Text content
+              const textPart = line.substring(2);
+              if (textPart && textPart !== '"') {
+                const cleanText = textPart.replace(/^"|"$/g, '');
+                streamedContent += cleanText;
+              }
+            } else if (line.startsWith('c:')) {
+              // Tool calls - parse and handle tool results
+              try {
+                const toolData = JSON.parse(line.substring(2));
+                if (toolData.toolName === 'getWeather' && toolData.result) {
+                  toolResults.push({
+                    toolName: 'getWeather',
+                    result: toolData.result
+                  });
+                }
+              } catch (e) {
+                // Ignore malformed tool data
+                console.debug('Could not parse tool data:', line);
+              }
+            }
+          }
+
+          // Update the assistant message with the streamed content and tool results
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMessage.id
-                ? { ...msg, parts: [{ type: "text", text: formatAIResponse(streamedContent) }] }
+                ? {
+                    ...msg,
+                    parts: [{ type: "text", text: formatAIResponse(streamedContent) }],
+                    toolResults: toolResults
+                  } as UIMessage
                 : msg
             )
           );
@@ -199,14 +241,18 @@ export default function Home() {
                         <div className="text-4xl text-center">🌍</div>
                         <h3 className="font-semibold text-xl text-gray-800 text-center">Welcome to your Travel Assistant!</h3>
                         <p className="text-gray-600 text-sm leading-relaxed text-center">
-                          I'm here to help you explore the world! Ask me about destinations, travel tips,
+                          I'm here to help you explore the world! Ask me about destinations, travel tips, weather conditions,
                           or when you're ready, I'll help you find the perfect accommodations.
                           Let's plan your perfect adventure together!
                         </p>
-                        <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
+                        <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
                           <span className="flex items-center gap-2">
                             <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                             Travel Advice
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                            Live Weather
                           </span>
                           <span className="flex items-center gap-2">
                             <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
@@ -226,16 +272,28 @@ export default function Home() {
                         className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
                         style={{ animationDelay: `${index * 100}ms` }}
                       >
-                        <div className={`max-w-2xl rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
-                          message.role === 'user'
-                            ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
-                            : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
-                        } p-4 group`}>
-                          <FormattedMessage
-                            content={message.parts.find(part => part.type === 'text')?.text || ''}
-                            role={message.role}
-                            isNew={message.role === 'assistant' && message.id === lastMessageId}
-                          />
+                        <div className={`max-w-2xl space-y-2`}>
+                          <div className={`rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                            message.role === 'user'
+                              ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
+                              : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
+                          } p-4 group`}>
+                            <FormattedMessage
+                              content={message.parts.find(part => part.type === 'text')?.text || ''}
+                              role={message.role}
+                              isNew={message.role === 'assistant' && message.id === lastMessageId}
+                            />
+                          </div>
+
+                          {/* Render weather widgets for tool results */}
+                          {message.role === 'assistant' && (message as ExtendedUIMessage).toolResults?.map((toolResult, index) => (
+                            toolResult.toolName === 'getWeather' && (
+                              <WeatherWidget
+                                key={`${message.id}-weather-${index}`}
+                                result={toolResult.result as WeatherToolResult}
+                              />
+                            )
+                          ))}
                         </div>
                       </div>
                     ))

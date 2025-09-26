@@ -38,11 +38,12 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 - `lib/utils/` - Utility functions including travel criteria extraction
 
 ### AI Integration
-- Uses AI SDK 5's `generateText()` for travel chat responses and property evaluation
+- Uses AI SDK 5's `streamText()` for travel chat responses with tool calling support
 - Configured for GPT-4o-mini via OpenAI provider
-- `/api/chat` for natural language travel conversation and advice
+- `/api/chat` for natural language travel conversation and advice with weather tool integration
 - `/api/search-accommodations` for streaming accommodation search with AI evaluation
-- Requires `OPENAI_API_KEY` in `.env.local`
+- **Weather Tool**: Real-time weather information using OpenWeatherMap API
+- Requires `OPENAI_API_KEY` and `OPENWEATHERMAP_API_KEY` in `.env.local`
 
 ### Accommodation Search Integration
 - **SerpApi Google Hotels** for real-time accommodation data
@@ -72,6 +73,7 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 Create `.env.local` with:
 ```
 OPENAI_API_KEY=your_openai_api_key_here
+OPENWEATHERMAP_API_KEY=your_openweathermap_api_key_here
 SERPAPI_API_KEY=your_serpapi_key_here
 USE_REAL_BOOKING_SEARCH=true  # Optional: enables production mode
 ```
@@ -81,8 +83,16 @@ USE_REAL_BOOKING_SEARCH=true  # Optional: enables production mode
 This application provides AI-powered travel advice and accommodation search including:
 - Destination suggestions and recommendations
 - Travel tips and local insights
-- Weather and seasonal travel advice
+- **Real-time weather information with interactive weather widgets**
 - Cultural information and travel planning guidance
 - Best times to visit various destinations
 - Smart accommodation search with SerpApi integration
 - AI-powered property evaluation and ranking
+
+### Weather Widget Features
+- **Automatic weather checking**: AI automatically fetches weather when destinations are mentioned
+- **Interactive weather cards**: Professional weather widgets display in chat conversation
+- **Comprehensive weather data**: Temperature, humidity, wind speed, conditions, and weather icons
+- **Temperature unit toggle**: Switch between Celsius and Fahrenheit
+- **Error handling**: Graceful handling of invalid locations and API failures
+- **Caching**: 5-minute cache to prevent duplicate API calls and optimize performance
