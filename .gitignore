@@ -39,6 +39,7 @@ yarn-error.log*
 # chat summary files and prompts
 Prompts/
 Chat Summaries/
+Research/
 
 # typescript
 *.tsbuildinfo
