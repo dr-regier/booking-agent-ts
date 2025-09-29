@@ -25,6 +25,7 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 - **Next.js 15** with App Router
 - **AI SDK 5** with OpenAI GPT-4o-mini integration
 - **SerpApi** for Google Hotels accommodation data
+- **Vectorize** for historical weather data and climate insights
 - **shadcn/ui** components (New York style, neutral base color)
 - **Tailwind CSS v4** for styling
 
@@ -35,6 +36,8 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 - `components/ui/` - shadcn/ui components
 - `components/ai-elements/` - AI chat interface components
 - `lib/booking-automation/` - SerpApi integration and AI evaluation
+- `lib/services/` - External API integrations (weather, vectorize)
+- `lib/tools/` - AI tools for weather and historical climate data
 - `lib/utils/` - Utility functions including travel criteria extraction
 
 ### AI Integration
@@ -43,7 +46,8 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 - `/api/chat` for natural language travel conversation and advice with weather tool integration
 - `/api/search-accommodations` for streaming accommodation search with AI evaluation
 - **Weather Tool**: Real-time weather information using OpenWeatherMap API
-- Requires `OPENAI_API_KEY` and `OPENWEATHERMAP_API_KEY` in `.env.local`
+- **Vectorize Tool**: Historical weather patterns and climate data for enhanced travel insights
+- Requires `OPENAI_API_KEY`, `OPENWEATHERMAP_API_KEY`, and Vectorize credentials in `.env.local`
 
 ### Accommodation Search Integration
 - **SerpApi Google Hotels** for real-time accommodation data
@@ -75,6 +79,9 @@ Create `.env.local` with:
 OPENAI_API_KEY=your_openai_api_key_here
 OPENWEATHERMAP_API_KEY=your_openweathermap_api_key_here
 SERPAPI_API_KEY=your_serpapi_key_here
+VECTORIZE_ACCESS_TOKEN=your_vectorize_access_token_here
+VECTORIZE_ORG_ID=your_vectorize_organization_id_here
+VECTORIZE_PIPELINE_ID=your_vectorize_pipeline_id_here
 USE_REAL_BOOKING_SEARCH=true  # Optional: enables production mode
 ```
 
@@ -84,8 +91,9 @@ This application provides AI-powered travel advice and accommodation search incl
 - Destination suggestions and recommendations
 - Travel tips and local insights
 - **Real-time weather information with interactive weather widgets**
+- **Historical climate data and seasonal weather patterns for enhanced travel timing insights**
 - Cultural information and travel planning guidance
-- Best times to visit various destinations
+- Best times to visit various destinations with data-driven recommendations
 - Smart accommodation search with SerpApi integration
 - AI-powered property evaluation and ranking
 
@@ -93,6 +101,7 @@ This application provides AI-powered travel advice and accommodation search incl
 - **Automatic weather checking**: AI automatically fetches weather when destinations are mentioned
 - **Interactive weather cards**: Professional weather widgets display in chat conversation
 - **Comprehensive weather data**: Temperature, humidity, wind speed, conditions, and weather icons
+- **Historical climate insights**: Access to historical weather patterns and seasonal trends via Vectorize
 - **Temperature unit toggle**: Switch between Celsius and Fahrenheit
 - **Error handling**: Graceful handling of invalid locations and API failures
 - **Caching**: 5-minute cache to prevent duplicate API calls and optimize performance
