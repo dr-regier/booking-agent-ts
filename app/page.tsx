@@ -137,12 +137,19 @@ export default function Home() {
                   // Handle tool output events
                   // console.log('Tool output event full details:', JSON.stringify(data, null, 2)); // Debug disabled
                   // Check if this is a weather tool result by looking at the output structure
-                  if (data.output && (data.output.success !== undefined || data.output.location || data.output.data)) {
+                  // Check for weather tool results (has temperature data)
+                  if (data.output && data.output.success && data.output.data && data.output.data.temperature !== undefined) {
                     // console.log('Weather tool output detected:', data.output); // Debug disabled
                     toolResults.push({
                       toolName: 'getWeather',
                       result: data.output
                     });
+                  }
+                  // Check for historical weather tool results (has context/documents)
+                  else if (data.output && data.output.success && (data.output.context || data.output.documents)) {
+                    // console.log('Historical weather tool output detected:', data.output); // Debug disabled
+                    // Don't add to toolResults - we want natural AI text responses, not widgets
+                    // The AI will use this data in its text response via system prompt injection
                   }
                 }
               } catch (e) {

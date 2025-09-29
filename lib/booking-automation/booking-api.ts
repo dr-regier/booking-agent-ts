@@ -40,6 +40,15 @@ interface SerpApiProperty {
   images?: Array<{
     thumbnail: string;
     original_image: string;
+    source_url?: string;
+  }>;
+  photo?: {
+    thumbnail?: string;
+    original?: string;
+  };
+  photos?: Array<{
+    thumbnail?: string;
+    original?: string;
   }>;
   overall_rating?: number;
   reviews?: number;
@@ -57,6 +66,7 @@ interface SerpApiResponse {
   properties?: SerpApiProperty[];
   brands?: any[];
   ads?: any[];
+  error?: any;
   pagination?: {
     next_page_token?: string;
   };

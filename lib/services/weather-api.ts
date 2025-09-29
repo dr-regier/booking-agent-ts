@@ -61,7 +61,7 @@ export class WeatherService {
       const data = await response.json() as OpenWeatherMapResponse | WeatherApiError;
 
       // Check if response contains error
-      if ('cod' in data && data.cod !== 200) {
+      if ('cod' in data && String(data.cod) !== '200') {
         throw new Error(data.message || 'Weather data unavailable');
       }
 
