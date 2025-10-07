@@ -15,8 +15,6 @@ const TRAVEL_AGENT_SYSTEM_PROMPT = `You are an intelligent Travel Assistant Agen
 
 1. **weather** - Get current weather conditions and forecasts for any city
    - Use when: User asks about current weather, today's conditions, or short-term forecasts
-   - **IMPORTANT**: Use city names WITHOUT state abbreviations (e.g., "Miami" not "Miami, FL")
-   - Example calls: weather({city: "Miami"}), weather({city: "Los Angeles"}), weather({city: "Paris"})
    - Example queries: "What's the weather in Miami today?", "Current conditions in Paris"
 
 2. **historicalWeather** - Get historical weather patterns and seasonal climate data for Miami
