@@ -41,12 +41,13 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 - `lib/utils/` - Utility functions including travel criteria extraction
 
 ### AI Integration
-- Uses AI SDK 5's `streamText()` for travel chat responses with tool calling support
+- Uses AI SDK 5's `streamText()` for travel chat responses
 - Configured for GPT-4o-mini via OpenAI provider
 - `/api/chat` for natural language travel conversation and advice with weather tool integration
 - `/api/search-accommodations` for streaming accommodation search with AI evaluation
-- **Weather Tool**: Real-time weather information using OpenWeatherMap API
-- **Vectorize Tool**: Historical weather patterns and climate data for enhanced travel insights
+- **Weather Tool**: Real-time weather information using OpenWeatherMap API with pattern-based detection
+- **Vectorize Tool**: Historical weather patterns and climate data for Miami (contextual pattern matching)
+- **Parallel tool execution**: Both weather tools can execute simultaneously when patterns match
 - Requires `OPENAI_API_KEY`, `OPENWEATHERMAP_API_KEY`, and Vectorize credentials in `.env.local`
 
 ### Accommodation Search Integration
@@ -91,17 +92,19 @@ This application provides AI-powered travel advice and accommodation search incl
 - Destination suggestions and recommendations
 - Travel tips and local insights
 - **Real-time weather information with interactive weather widgets**
-- **Historical climate data and seasonal weather patterns for enhanced travel timing insights**
+- **Historical climate data and seasonal weather patterns for Miami**
 - Cultural information and travel planning guidance
-- Best times to visit various destinations with data-driven recommendations
+- Best times to visit destinations with data-driven weather recommendations
 - Smart accommodation search with SerpApi integration
 - AI-powered property evaluation and ranking
 
-### Weather Widget Features
-- **Automatic weather checking**: AI automatically fetches weather when destinations are mentioned
-- **Interactive weather cards**: Professional weather widgets display in chat conversation
-- **Comprehensive weather data**: Temperature, humidity, wind speed, conditions, and weather icons
-- **Historical climate insights**: Access to historical weather patterns and seasonal trends via Vectorize
-- **Temperature unit toggle**: Switch between Celsius and Fahrenheit
-- **Error handling**: Graceful handling of invalid locations and API failures
-- **Caching**: 5-minute cache to prevent duplicate API calls and optimize performance
+### Weather & Climate Integration
+- **Pattern-based detection**: Uses regex patterns to detect weather queries in user messages
+- **Real-time weather**: Current conditions for any city via OpenWeatherMap API
+- **Historical climate data**: Seasonal weather patterns and trends for Miami via Vectorize
+- **Interactive weather cards**: Professional weather widgets displayed in chat conversation
+- **Comprehensive weather data**: Temperature (°C/°F), humidity, wind speed, conditions, and weather icons
+- **Temperature unit toggle**: Switch between Celsius and Fahrenheit in the UI
+- **Parallel execution**: Weather and historical climate tools run simultaneously when both patterns detected
+- **Error handling**: Graceful failure handling for invalid locations or API errors
+- **Stream injection**: Weather data injected into AI response stream for seamless UX
