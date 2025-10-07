@@ -9,7 +9,7 @@ import { getFirecrawlMCPClient } from '@/lib/mcp';
 export const maxDuration = 30;
 
 // Travel Agent System Prompt
-const TRAVEL_AGENT_SYSTEM_PROMPT = `You are an intelligent Travel Assistant Agent specializing in Miami travel planning. You have access to multiple tools that you can use autonomously to help users with comprehensive travel research and planning.
+const TRAVEL_AGENT_SYSTEM_PROMPT = `You are an intelligent Travel Assistant Agent specializing in travel planning. You have access to multiple tools that you can use autonomously to help users with comprehensive travel research and planning.
 
 **Your Available Tools:**
 
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     // Stream text with agentic tool calling
     const result = streamText({
-      model: openai('gpt-5'), // Using gpt-4o-mini as requested (gpt-5 may not be available yet)
+      model: openai('gpt-5'), 
       system: TRAVEL_AGENT_SYSTEM_PROMPT,
       messages: convertToModelMessages(messages),
       tools: wrappedTools,
