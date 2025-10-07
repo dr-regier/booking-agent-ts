@@ -2,40 +2,54 @@
 
 ## Overview
 
-A comprehensive AI-powered travel assistant that combines conversational AI with real-time weather data, historical climate insights, and Google Hotels integration to provide personalized travel advice and accommodation recommendations. This full-stack application demonstrates advanced integration of multiple AI technologies, external APIs, and modern React development practices.
+A comprehensive **agentic AI-powered travel assistant** that autonomously orchestrates multiple tools to provide personalized travel advice. The agent combines conversational AI with real-time weather data, historical climate insights, web research capabilities via Firecrawl MCP, and Google Hotels integration. This full-stack application demonstrates advanced agentic architecture, Model Context Protocol integration, multi-source API orchestration, and modern React development practices.
 
 ## Problem Statement
 
-Traditional travel planning is fragmented across multiple platforms - researching destinations, checking weather conditions, understanding seasonal patterns, comparing accommodations, and making informed timing decisions. This scattered approach is time-consuming and often leads to suboptimal travel experiences due to incomplete information about weather conditions, seasonal factors, and accommodation options.
+Traditional travel planning is fragmented across multiple platforms - researching destinations, checking weather conditions, understanding seasonal patterns, finding attractions and restaurants, comparing accommodations, and making informed timing decisions. Users must manually navigate between search engines, weather sites, booking platforms, and review sites. This scattered approach is time-consuming and often leads to suboptimal travel experiences due to incomplete information and the inability to synthesize data from multiple sources into coherent recommendations.
 
 ## Solution
 
-A unified AI-powered travel platform that:
-- Engages users in natural conversation to provide destination recommendations and travel advice
-- Provides real-time weather information and historical climate data for informed travel timing decisions
-- Automatically detects weather-related queries and enriches responses with current conditions
-- Intelligently searches Google Hotels with advanced pre-filtering based on user criteria
-- Delivers personalized accommodation recommendations with AI-powered evaluation
-- Presents all information in a seamless, conversational interface with interactive weather widgets
+A unified **agentic AI travel platform** that autonomously orchestrates multiple tools:
+- **Autonomous decision-making**: AI agent independently chooses which tools to use and in what order
+- **Multi-step reasoning**: Combines information from multiple sources for comprehensive answers
+- **Natural conversation**: Engages users in dialogue to understand needs and provide tailored advice
+- **Real-time web research**: Searches, scrapes, crawls, and extracts data from any website via Firecrawl MCP
+- **Weather intelligence**: Provides real-time weather and historical climate data for informed timing decisions
+- **Accommodation search**: Intelligently searches Google Hotels with AI-powered evaluation
+- **Interactive presentation**: Displays all information in a seamless chat interface with weather widgets and structured results
 
 ## Key Features & Capabilities
 
-### **Conversational AI Interface**
-- Natural language processing for travel advice and criteria extraction
-- Context-aware responses using OpenAI's GPT-4o-mini
-- Real-time typewriter animations for enhanced user experience
-- Intelligent parsing of complex travel requests (e.g., "my wife and I" → 2 guests)
-- Multi-turn conversation flow for destination exploration and booking
+### **Agentic AI Architecture**
+- **Autonomous tool orchestration**: AI independently selects and combines 7+ tools
+- **Multi-step reasoning**: Plans and executes complex research workflows
+- **Natural language understanding**: Parses travel requests and extracts structured criteria
+- **Context-aware responses**: Maintains conversation context across multiple tool calls
+- **Parallel execution**: Runs multiple tools simultaneously for efficient responses
+- **Graceful degradation**: Continues conversation if individual tools fail
+- **Tool combination examples**:
+  - "Plan Miami trip" → Climate data + Search attractions + Search restaurants + Research activities
+  - "Find beachfront hotels" → Web search + Scrape details + Extract pricing + AI evaluation
 
 ### **Weather & Climate Intelligence**
 - **Real-time weather data**: Current conditions for any city via OpenWeatherMap API
 - **Historical climate insights**: Seasonal weather patterns and trends for Miami via Vectorize
-- **Pattern-based detection**: Automatic weather tool activation through regex pattern matching
 - **Interactive weather widgets**: Professional weather cards embedded in chat conversation
 - **Comprehensive data display**: Temperature (°C/°F toggle), humidity, wind speed, conditions, weather icons
-- **Parallel tool execution**: Weather and climate tools run simultaneously for efficient responses
-- **Stream injection**: Weather data seamlessly injected into AI response streams
-- **Best time to visit recommendations**: Data-driven travel timing advice based on climate patterns
+- **Parallel tool execution**: Weather and climate tools run simultaneously
+- **Best time to visit recommendations**: Data-driven travel timing advice
+
+### **Web Research Capabilities (Firecrawl MCP)**
+- **Model Context Protocol integration**: Industry-standard protocol for AI tool access
+- **SSE Transport**: Real-time streaming communication with Firecrawl server
+- **Search**: Find hotels, restaurants, attractions, and activities across the web
+- **Scrape**: Extract detailed content from specific URLs for deeper analysis
+- **Crawl**: Deep dive into entire websites for comprehensive information gathering
+- **Extract**: Get structured data from web pages (pricing, ratings, availability, reviews)
+- **Deep Research**: Conduct thorough multi-step research on complex topics
+- **Autonomous activation**: AI decides when to use web research vs other tools
+- **Error resilience**: Graceful handling of MCP connection or API failures
 
 ### **Smart Accommodation Search with Pre-Filtering**
 - **SerpApi Google Hotels** for comprehensive, real-time accommodation data
@@ -65,19 +79,22 @@ A unified AI-powered travel platform that:
 ### **Modern Stack Implementation**
 - **Next.js 15** with App Router and Turbopack for optimal performance
 - **TypeScript** throughout for type safety and developer experience
-- **AI SDK 5** for seamless OpenAI integration
+- **AI SDK 5** with agentic architecture for autonomous tool orchestration
+- **Model Context Protocol (MCP)** for standardized AI tool integration
+- **@modelcontextprotocol/sdk** for Firecrawl SSE transport
 - **shadcn/ui** component system for consistent, accessible design
 - **Tailwind CSS v4** for responsive, utility-first styling
 
 ### **Advanced API Integration Techniques**
-- **Multi-API orchestration**: Weather, climate, and accommodation data from three external services
-- **Intelligent parameter mapping** from natural language to API filters
-- **Real-time data processing** from Google Hotels comprehensive dataset
-- **Pattern-based tool activation**: Regex detection for automatic weather/climate data retrieval
-- **Parallel API execution**: Weather and Vectorize tools run concurrently when both patterns match
-- **Stream-based data injection**: Real-time weather data insertion into AI response streams
-- **Error handling and graceful degradation** mechanisms across all API integrations
-- **Resource optimization** with efficient API usage strategies
+- **Agentic tool orchestration**: AI autonomously decides which tools to call and in what sequence
+- **Multi-API coordination**: Weather, climate, web research, and accommodation data from 4+ services
+- **Model Context Protocol (MCP)**: Standardized integration for Firecrawl web research tools
+- **SSE streaming**: Real-time bidirectional communication with MCP servers
+- **Parallel API execution**: Multiple tools run concurrently for optimal performance
+- **Intelligent parameter mapping**: Natural language → structured API requests
+- **Tool wrapping and logging**: Comprehensive observability for agent decision-making
+- **Error handling and graceful degradation**: Individual tool failures don't break conversation
+- **Resource optimization**: Efficient API usage with smart caching strategies
 
 ### **User Experience Innovations**
 - **Interactive weather widgets** with real-time data visualization
@@ -96,20 +113,24 @@ A unified AI-powered travel platform that:
 - Database-free architecture using intelligent caching strategies
 - Production deployment considerations and environment management
 
-### **AI Integration**
-- Large Language Model integration and prompt engineering
-- Natural language processing for structured data extraction
-- Conversational UI/UX design patterns
-- AI response formatting and presentation
+### **AI & Agentic Systems**
+- **Agentic architecture**: Autonomous multi-step reasoning and tool orchestration
+- **Model Context Protocol (MCP)**: Standardized AI tool integration
+- **Large Language Model integration**: Advanced prompt engineering for agent behavior
+- **Natural language processing**: Structured data extraction from unstructured text
+- **Conversational UI/UX design**: Context-aware multi-turn dialogue patterns
+- **Tool selection logic**: AI decision-making for optimal tool combinations
 
 ### **API Integration & Data Processing**
-- **Multi-source API integration**: OpenWeatherMap, Vectorize, and SerpApi coordination
-- **Pattern-based automation**: Regex-driven tool activation for weather queries
-- **Parallel execution strategies**: Concurrent API calls with Promise.all
-- **Stream manipulation**: Custom ReadableStream for weather data injection
-- **Real-time accommodation data processing** and filtering
-- **Intelligent search parameter optimization** across multiple services
-- **Secure API key management** and error handling for multiple external services
+- **Multi-source API orchestration**: OpenWeatherMap, Vectorize, Firecrawl, and SerpApi (4+ services)
+- **Model Context Protocol (MCP)**: Standardized communication with external tool providers
+- **SSE transport**: Real-time streaming from Firecrawl MCP server
+- **Agentic tool selection**: AI-driven decision-making for tool usage
+- **Parallel execution strategies**: Concurrent API calls for optimal performance
+- **Real-time data processing**: Accommodation, weather, and web research data filtering
+- **Intelligent search optimization**: Parameter mapping across multiple APIs
+- **Secure credential management**: Environment-based configuration for 4+ API keys
+- **Comprehensive error handling**: Graceful degradation when individual services fail
 
 ### **Professional Development Practices**
 - Git version control with feature branch workflows
@@ -120,83 +141,95 @@ A unified AI-powered travel platform that:
 ## Challenges Overcome
 
 ### **Technical Challenges**
-- **Multi-API orchestration**: Coordinating three external APIs (OpenWeatherMap, Vectorize, SerpApi) with different response patterns
-- **Pattern detection accuracy**: Developing regex patterns that correctly identify weather queries without false positives
-- **Stream data injection**: Implementing custom ReadableStream to inject weather data into AI response streams
-- **Parallel execution management**: Coordinating concurrent API calls while handling individual failures gracefully
-- **Data filtering optimization**: Implemented comprehensive pre-filtering to reduce irrelevant accommodation results by 90%+
-- **Performance optimization**: Created efficient search strategies balancing speed and comprehensiveness across multiple data sources
+- **Agentic architecture design**: Building autonomous decision-making system for tool selection and orchestration
+- **Model Context Protocol integration**: Implementing standardized MCP client with SSE transport for Firecrawl
+- **Multi-API orchestration**: Coordinating 4+ external APIs (OpenWeatherMap, Vectorize, Firecrawl, SerpApi) with different patterns
+- **Tool wrapping and observability**: Creating logging infrastructure to track agent decisions and tool execution
+- **Parallel execution management**: Coordinating concurrent tool calls while handling individual failures gracefully
+- **MCP connection resilience**: Implementing graceful degradation when MCP server unavailable
+- **Data filtering optimization**: Comprehensive pre-filtering to reduce irrelevant results by 90%+
+- **Performance optimization**: Balancing autonomous research with response speed
 
 ### **User Experience Challenges**
-- **Seamless tool integration**: Weather data appears naturally in conversation without disrupting flow
-- **Interactive widget design**: Creating professional weather cards that integrate with chat interface
-- **Complex state synchronization**: Managed real-time updates across multiple UI components (chat, weather widgets, search results)
-- **Performance optimization**: Balanced real-time features with application responsiveness across multiple data sources
-- **Error handling**: Graceful degradation when weather/climate APIs fail without breaking conversation
-- **Accessibility**: Ensured screen reader compatibility and keyboard navigation for all interactive elements
+- **Transparent agent behavior**: Making autonomous tool decisions visible and understandable to users
+- **Seamless multi-tool integration**: Synthesizing data from 4+ sources into coherent responses
+- **Interactive widget design**: Professional weather cards and structured results in chat interface
+- **Complex state synchronization**: Real-time updates across chat, weather widgets, web research results
+- **Performance vs completeness**: Balancing thorough research with response speed
+- **Error handling**: Graceful degradation when individual tools fail without breaking conversation
+- **Loading states**: Clear feedback during multi-step agent reasoning and tool execution
+- **Accessibility**: Screen reader compatibility and keyboard navigation throughout
 
 ### **Business Logic Challenges**
-- **Dual pattern detection**: Distinguishing between current weather and historical climate queries
-- **Criteria extraction accuracy**: Developed comprehensive regex patterns for natural language parsing (weather, destinations, booking criteria)
-- **Context-aware responses**: Enriching AI responses with weather data when available
-- **Result ranking algorithms**: Created intelligent scoring systems for accommodation recommendations
-- **Tool activation logic**: Determining when to trigger weather tools vs. historical climate tools vs. both
+- **Agentic prompt engineering**: Designing system prompts that enable effective autonomous decision-making
+- **Tool selection strategy**: Teaching AI when to use each tool and how to combine them effectively
+- **Multi-source data synthesis**: Merging information from web research, weather, climate, and accommodation APIs
+- **Context maintenance**: Preserving conversation context across multiple tool invocations
+- **Result ranking algorithms**: Intelligent scoring for accommodations from multiple data sources
+- **Research depth control**: Balancing comprehensive research with reasonable response times
 
 ## Professional Impact
 
 ### **Demonstrates Proficiency In:**
+- **Agentic AI systems**: Autonomous decision-making and multi-step reasoning
+- **Model Context Protocol (MCP)**: Standardized AI tool integration
 - Modern React ecosystem and Next.js best practices
-- AI/ML integration in production applications with conversational interfaces
-- **Multi-source API orchestration** and intelligent data processing techniques
-- **Real-time stream manipulation** for dynamic content injection
-- **Pattern-based automation** with regex detection and tool activation
+- AI/ML integration with conversational interfaces
+- **Multi-source API orchestration** across 4+ external services
+- **Real-time streaming** with SSE transport and bidirectional communication
+- Advanced prompt engineering for agent behavior
 - User-centered design and accessibility standards
-- Full-stack TypeScript development
+- Full-stack TypeScript development with type-safe tool interfaces
 
 ### **Industry-Relevant Skills:**
-- **DevOps**: Multi-environment management with multiple API key configurations
-- **API Integration**: Coordinating three external services (OpenWeatherMap, Vectorize, SerpApi) with different patterns
-- **Performance**: Parallel execution, stream optimization, and efficient data processing
-- **Scalability**: Architecture designed for growth with modular tool system
-- **Error Handling**: Graceful degradation across multiple API failure scenarios
+- **Agentic Systems**: Building autonomous AI agents with tool orchestration
+- **Model Context Protocol**: Industry-standard protocol for AI-tool communication
+- **DevOps**: Multi-environment management with 4+ API integrations
+- **API Integration**: Coordinating OpenWeatherMap, Vectorize, Firecrawl, and SerpApi
+- **Performance**: Parallel execution, SSE streaming, and efficient data processing
+- **Scalability**: Modular tool architecture with plugin-style design
+- **Error Handling**: Comprehensive failure scenarios across multiple services
+- **Observability**: Logging and monitoring for agent decision-making
 
 ## Future Enhancements
 
 ### **Near-term Improvements**
-- **Expand weather coverage**: Add historical climate data for destinations beyond Miami
-- **Flight integration**: Add flight search and recommendations
-- **Enhanced visualizations**: Charts for temperature trends, rainfall patterns across months
-- Integration with additional booking platforms (Expedia, Priceline)
-- Enhanced AI reasoning with detailed property analysis
-- User authentication and preference persistence
-- Mobile application development with React Native
+- **Expand MCP integrations**: Add more MCP servers (Google Maps, Yelp, TripAdvisor)
+- **Memory system**: Persistent context and user preference learning
+- **Enhanced visualizations**: Charts for temperature trends, price comparisons
+- **Flight integration**: Add flight search via additional MCP tools
+- **Expand weather coverage**: Historical climate data for destinations beyond Miami
+- **Agent reflection**: Self-evaluation and reasoning improvement loops
+- **User authentication**: Preference persistence and conversation history
 
 ### **Advanced Features**
-- **Advanced climate analytics**: Multi-year weather trends and anomaly detection
-- **Trip optimization**: Suggest best travel dates based on weather, events, and pricing
-- Machine learning model for personalized recommendations based on past preferences
-- Real-time price monitoring and alerts for accommodations
-- Group booking coordination features
-- Integration with calendar and travel planning tools
+- **Multi-agent collaboration**: Specialized agents for different travel aspects
+- **Advanced reasoning**: GPT-o1 integration for complex planning
+- **Trip optimization**: ML-driven suggestions for dates based on weather, events, pricing
+- **Personalization engine**: Learn from past interactions and preferences
+- **Real-time monitoring**: Price alerts and availability notifications
+- **Group coordination**: Multi-traveler planning and consensus building
+- **Calendar integration**: Sync with existing schedules and bookings
 
 ### **Technical Expansion**
-- **Caching layer**: Redis implementation for weather/climate data to reduce API calls
-- **Rate limiting**: Implement request throttling for all external APIs
-- Microservices architecture for improved scalability
-- Database integration for user data, search history, and analytics
-- Comprehensive testing suite with Jest and API integration tests
-- **Monitoring and observability**: Add logging, metrics, and tracing for API calls
+- **Additional MCP servers**: Build custom MCP servers for proprietary data sources
+- **Agent evaluation framework**: Metrics for tool selection quality and reasoning effectiveness
+- **Caching layer**: Redis for API responses and agent decision caching
+- **Rate limiting**: Smart throttling across all external APIs
+- **Database integration**: Store conversation history, preferences, and analytics
+- **Testing suite**: Unit, integration, and agent behavior tests
+- **Monitoring and observability**: Comprehensive logging, metrics, and tracing for agent decisions
 
 ## Academic Context
 
-This project was developed as a capstone demonstration of full-stack development skills, showcasing the integration of cutting-edge AI technologies with multiple external API services and advanced data processing techniques. It represents a synthesis of coursework in web development, artificial intelligence, API integration patterns, and software engineering principles. The project evolved from a focused booking assistant to a comprehensive travel platform, demonstrating adaptability and expanding technical capabilities.
+This project was developed as a capstone demonstration of full-stack development skills, showcasing the integration of cutting-edge **agentic AI architecture** with **Model Context Protocol**, multiple external API services, and advanced data processing techniques. It represents a synthesis of coursework in web development, artificial intelligence, agentic systems, API integration patterns, and software engineering principles. The project evolved from a focused booking assistant to a comprehensive **autonomous travel research agent**, demonstrating adaptability, expanding technical capabilities, and implementing industry-standard protocols like MCP.
 
 ## Repository & Demo
 
 - **GitHub**: [dr-regier/booking-agent-ts](https://github.com/dr-regier/booking-agent-ts)
-- **Technologies**: Next.js 15, TypeScript, AI SDK 5, OpenWeatherMap, Vectorize, SerpApi, OpenAI GPT-4o-mini
+- **Technologies**: Next.js 15, TypeScript, AI SDK 5, Model Context Protocol, Firecrawl, OpenWeatherMap, Vectorize, SerpApi, OpenAI GPT-4o-mini
 - **License**: Academic/Portfolio Use
 
 ---
 
-*This project demonstrates advanced proficiency in modern web development, conversational AI integration, multi-source API orchestration, real-time stream manipulation, and intelligent pattern-based automation while maintaining efficient resource usage and user-focused design principles.*
+*This project demonstrates advanced proficiency in **agentic AI systems**, **Model Context Protocol integration**, modern web development, conversational AI, multi-source API orchestration (4+ services), real-time streaming, autonomous tool orchestration, and intelligent decision-making while maintaining efficient resource usage and user-focused design principles.*
