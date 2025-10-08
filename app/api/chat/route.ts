@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
     console.log(`   - Firecrawl tools: ${Object.keys(firecrawlTools).join(', ')}`);
     console.log(`   - Weather tool: weather`);
     console.log(`   - Historical weather tool: historicalWeather`);
+    console.log(`   - Web search tool: web_search`);
 
     // Wrap all tools with logging to track agent decisions
     const wrappedTools = Object.fromEntries(
