@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       model: openai('gpt-5'), 
       system: TRAVEL_AGENT_SYSTEM_PROMPT,
       messages: convertToModelMessages(messages),
-      tools: allTools,
+      tools: wrappedTools,
       stopWhen: stepCountIs(10),
       // The agent can make multiple autonomous tool calls per turn
       // AI SDK 5.0 handles tool calling loops automatically
