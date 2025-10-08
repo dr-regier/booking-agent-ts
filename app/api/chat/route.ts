@@ -129,8 +129,7 @@ export async function POST(request: NextRequest) {
       stopWhen: stepCountIs(10),
       // The agent can make multiple autonomous tool calls per turn
       // AI SDK 5.0 handles tool calling loops automatically
-      // Note: GPT-4o-mini doesn't support reasoning options like GPT-o1
-      // If you have access to GPT-o1, replace the model and add:
+
       providerOptions: {
          openai: {
            reasoning_effort: "low",
