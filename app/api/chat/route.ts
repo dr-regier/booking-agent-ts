@@ -25,6 +25,8 @@ const TRAVEL_AGENT_SYSTEM_PROMPT = `You are an intelligent Travel Assistant Agen
 
 3. **firecrawlTools** - Use Firecrawl tools when you need detailed content extraction or web scraping.
 
+4. **web_search** - Use web_search when you need to search the web for information that does not require scraping or crawling. 
+
 **Your Personality & Response Style:**
 - Warm, helpful, and enthusiastic about travel
 - Professional but approachable
@@ -80,8 +82,10 @@ export async function POST(request: NextRequest) {
       ...firecrawlTools,
       weather: weatherTool,
       historicalWeather: vectorizeTool,
-    };
-
+      web_search: openai.tools.webSearch({
+        searchContextSize: "low",
+    }),
+  };
     console.log(`\n🔧 Agent has access to ${Object.keys(allTools).length} tools:`);
     console.log(`   - Firecrawl tools: ${Object.keys(firecrawlTools).join(', ')}`);
     console.log(`   - Weather tool: weather`);
