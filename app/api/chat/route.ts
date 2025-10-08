@@ -10,9 +10,6 @@ export const maxDuration = 30;
 
 // Travel Agent System Prompt
 const TRAVEL_AGENT_SYSTEM_PROMPT = `You are an intelligent Travel Assistant Agent specializing in travel planning. You have access to multiple tools that you can use autonomously to help users with comprehensive travel research and planning.
-
-   When answering complex queries, explicitly show your step-by-step reasoning process before calling tools.
-   Show your step-by-step reasoning process in the response.
   
 **Your Available Tools:**
 
