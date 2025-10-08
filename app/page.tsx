@@ -101,7 +101,7 @@ export default function Home() {
 
       const decoder = new TextDecoder();
       let streamedContent = "";
-      let reasoningContent = "";
+      let reasoningSteps = new Map<string, string>(); // Track reasoning steps by ID
       let toolResults: {toolName: string; result: any}[] = [];
 
       // Create an assistant message for streaming
@@ -139,9 +139,16 @@ export default function Home() {
                 // console.log('Streaming event received:', data); // Debug disabled
                 if (data.type === 'text-delta' && data.delta) {
                   streamedContent += data.delta;
-                } else if (data.type === 'reasoning-delta' && data.delta) {
-                  // Handle reasoning content streaming
-                  reasoningContent += data.delta;
+                } else if (data.type === 'reasoning-start' && data.id) {
+                  // Initialize new reasoning step
+                  reasoningSteps.set(data.id, '');
+                } else if (data.type === 'reasoning-delta' && data.delta && data.id) {
+                  // Append content to the correct reasoning step by ID
+                  const currentContent = reasoningSteps.get(data.id) || '';
+                  reasoningSteps.set(data.id, currentContent + data.delta);
+                } else if (data.type === 'reasoning-end' && data.id) {
+                  // Reasoning step complete (optional - for future use)
+                  // Could add metadata or finalization logic here if needed
                 } else if (data.type === 'tool-output-available') {
                   // Handle tool output events
                   // console.log('Tool output event full details:', JSON.stringify(data, null, 2)); // Debug disabled
@@ -189,7 +196,10 @@ export default function Home() {
                 ? {
                     ...msg,
                     parts: [
-                      ...(reasoningContent ? [{ type: "reasoning", text: reasoningContent }] : []),
+                      // Convert reasoning steps Map to array of parts (one per step)
+                      ...Array.from(reasoningSteps.values()).map(text =>
+                        ({ type: "reasoning", text })
+                      ),
                       { type: "text", text: formatAIResponse(streamedContent) }
                     ],
                     toolResults: toolResults
