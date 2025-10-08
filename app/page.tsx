@@ -13,6 +13,11 @@ import { formatAIResponse } from "@/lib/utils/format-response";
 import { FormattedMessage } from "@/components/formatted-message";
 import { WeatherWidget } from "@/components/weather-widget";
 import type { WeatherToolResult } from "@/lib/tools/weather-tool";
+import {
+  Reasoning,
+  ReasoningTrigger,
+  ReasoningContent,
+} from "@/components/ai-elements/reasoning";
 
 interface AccommodationResult {
   id: string;
@@ -96,6 +101,7 @@ export default function Home() {
 
       const decoder = new TextDecoder();
       let streamedContent = "";
+      let reasoningContent = "";
       let toolResults: {toolName: string; result: any}[] = [];
 
       // Create an assistant message for streaming
@@ -130,9 +136,12 @@ export default function Home() {
                   break;
                 }
                 const data = JSON.parse(jsonStr);
-                    // console.log('Streaming event received:', data); // Debug disabled
+                // console.log('Streaming event received:', data); // Debug disabled
                 if (data.type === 'text-delta' && data.delta) {
                   streamedContent += data.delta;
+                } else if (data.type === 'reasoning-delta' && data.delta) {
+                  // Handle reasoning content streaming
+                  reasoningContent += data.delta;
                 } else if (data.type === 'tool-output-available') {
                   // Handle tool output events
                   // console.log('Tool output event full details:', JSON.stringify(data, null, 2)); // Debug disabled
@@ -172,14 +181,17 @@ export default function Home() {
             }
           }
 
-          
-          // Update the assistant message with the streamed content and tool results
+
+          // Update the assistant message with the streamed content, reasoning, and tool results
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMessage.id
                 ? {
                     ...msg,
-                    parts: [{ type: "text", text: formatAIResponse(streamedContent) }],
+                    parts: [
+                      ...(reasoningContent ? [{ type: "reasoning", text: reasoningContent }] : []),
+                      { type: "text", text: formatAIResponse(streamedContent) }
+                    ],
                     toolResults: toolResults
                   } as UIMessage
                 : msg
@@ -291,37 +303,54 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                    limitedMessages.map((message, index) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
-                        <div className={`max-w-2xl space-y-2`}>
-                          <div className={`rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
-                            message.role === 'user'
-                              ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
-                              : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
-                          } p-4 group`}>
-                            <FormattedMessage
-                              content={message.parts.find(part => part.type === 'text')?.text || ''}
-                              role={message.role}
-                              isNew={message.role === 'assistant' && message.id === lastMessageId}
-                            />
-                          </div>
-
-                          {/* Render weather widgets for tool results */}
-                          {message.role === 'assistant' && (message as ExtendedUIMessage).toolResults?.map((toolResult, index) => (
-                            toolResult.toolName === 'getWeather' && (
-                              <WeatherWidget
-                                key={`${message.id}-weather-${index}`}
-                                result={toolResult.result as WeatherToolResult}
+                    limitedMessages.map((message, index) => {
+                      // Extract reasoning parts (if any)
+                      const parts = (message as any).parts || [];
+                      const reasoningParts = parts.filter((part: any) => part.type === 'reasoning');
+                      
+                      return (
+                        <div
+                          key={message.id}
+                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-${message.role === 'user' ? 'right' : 'left'} duration-300`}
+                          style={{ animationDelay: `${index * 100}ms` }}
+                        >
+                          <div className={`max-w-2xl space-y-2`}>
+                            {/* Render reasoning blocks BEFORE the message */}
+                            {reasoningParts.map((reasoningPart: any, reasoningIndex: number) => (
+                              <div key={`reasoning-${message.id}-${reasoningIndex}`} className="mb-4">
+                                <Reasoning isStreaming={isLoading && message.id === lastMessageId}>
+                                  <ReasoningTrigger />
+                                  <ReasoningContent>{reasoningPart.text || ''}</ReasoningContent>
+                                </Reasoning>
+                              </div>
+                            ))}
+                            
+                            {/* Your existing message rendering */}
+                            <div className={`rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                              message.role === 'user'
+                                ? 'bg-blue-500 border-blue-400 text-white hover:bg-blue-600'
+                                : 'bg-white/95 border-gray-200 text-gray-800 hover:bg-white'
+                            } p-4 group`}>
+                              <FormattedMessage
+                                content={message.parts.find(part => part.type === 'text')?.text || ''}
+                                role={message.role}
+                                isNew={message.role === 'assistant' && message.id === lastMessageId}
                               />
-                            )
-                          ))}
+                            </div>
+
+                            {/* Render weather widgets for tool results */}
+                            {message.role === 'assistant' && (message as ExtendedUIMessage).toolResults?.map((toolResult, toolIndex) => (
+                              toolResult.toolName === 'getWeather' && (
+                                <WeatherWidget
+                                  key={`${message.id}-weather-${toolIndex}`}
+                                  result={toolResult.result as WeatherToolResult}
+                                />
+                              )
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                   {error && (
                     <div className="flex justify-start">
