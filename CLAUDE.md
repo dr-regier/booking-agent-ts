@@ -23,11 +23,12 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 
 ### Core Stack
 - **Next.js 15** with App Router and Turbopack
-- **AI SDK 5** with OpenAI GPT-4o-mini integration
+- **AI SDK 5** with OpenAI GPT-5 (o-series reasoning model)
 - **Model Context Protocol (MCP)** with Firecrawl integration for web research
 - **SerpApi** for Google Hotels accommodation data
 - **Vectorize** for historical weather data and climate insights
 - **OpenWeatherMap** for real-time weather data
+- **Streamdown** for animated reasoning text streaming
 - **shadcn/ui** components (New York style, neutral base color)
 - **Tailwind CSS v4** for styling
 
@@ -46,7 +47,9 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 ### AI Integration
 - **Agentic Architecture**: AI autonomously decides which tools to use and in what order
 - Uses AI SDK 5's `streamText()` for travel chat responses with multi-step reasoning
-- Configured for GPT-4o-mini via OpenAI provider
+- Configured for **GPT-5 (o-series)** via OpenAI provider with reasoning capabilities
+- **Multi-step reasoning display**: Separate collapsible accordions for each reasoning phase
+- **Reasoning configuration**: `reasoningEffort: "low"`, `textVerbosity: "low"`, `reasoningSummary: "detailed"`
 - `/api/chat` - Agentic endpoint with 7+ tools for autonomous research and planning
 - `/api/search-accommodations` - Streaming accommodation search with AI evaluation
 
@@ -63,7 +66,7 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 - **Autonomous decision-making**: AI chooses which tools to call based on user needs
 
 #### Required Environment Variables
-- `OPENAI_API_KEY` - OpenAI GPT-4o-mini access
+- `OPENAI_API_KEY` - OpenAI GPT-5 (o-series) access
 - `OPENWEATHERMAP_API_KEY` - Real-time weather data
 - `FIRECRAWL_API_KEY` - Firecrawl MCP web research tools
 - `VECTORIZE_ACCESS_TOKEN`, `VECTORIZE_ORG_ID`, `VECTORIZE_PIPELINE_ID` - Historical climate data
@@ -85,7 +88,9 @@ This is an AI-powered travel assistant application built with TypeScript and Nex
 - **AI Elements** from Vercel:
   - Pre-built components for AI applications
   - Located in `components/ai-elements/`
-  - Key components: Message, PromptInput, FormattedMessage
+  - Key components: Message, PromptInput, FormattedMessage, Reasoning
+  - **Reasoning UI**: Collapsible accordions with `ReasoningTrigger` and `ReasoningContent`
+  - **Streamdown integration**: Animated text streaming for reasoning steps
   - Uses `UIMessage` type from AI SDK
 
 ### Adding Components
@@ -119,7 +124,9 @@ USE_REAL_BOOKING_SEARCH=true
 This application features an **autonomous AI agent** that makes intelligent decisions about which tools to use and when:
 
 #### Core Capabilities
-- **Autonomous multi-step reasoning**: AI determines optimal tool combinations
+- **Autonomous multi-step reasoning**: GPT-5 (o-series) reasoning model with visible thought process
+- **Interactive reasoning display**: Each reasoning step shown in separate collapsible accordions
+- **Animated reasoning streams**: Real-time word-by-word display via Streamdown
 - **Destination research and recommendations**: Web search and deep research via Firecrawl
 - **Real-time weather information**: Current conditions for any city with interactive widgets
 - **Historical climate intelligence**: Seasonal patterns and best-time-to-visit recommendations

@@ -1,10 +1,13 @@
 # Agentic AI Travel Assistant
 
-An intelligent **agentic travel assistant** that autonomously orchestrates multiple tools to provide comprehensive travel research and planning. The AI agent combines conversational intelligence with real-time weather data, historical climate insights, web research via Firecrawl MCP, and Google Hotels integration. Built with Next.js 15, TypeScript, AI SDK 5, and Model Context Protocol.
+An intelligent **agentic travel assistant** powered by **GPT-5 (o-series)** that autonomously orchestrates multiple tools to provide comprehensive travel research and planning. The AI agent features **visible multi-step reasoning** with interactive accordions, combining conversational intelligence with real-time weather data, historical climate insights, web research via Firecrawl MCP, and Google Hotels integration. Built with Next.js 15, TypeScript, AI SDK 5, and Model Context Protocol.
 
 ## 🚀 Key Features
 
 ### **Agentic AI Architecture**
+- **GPT-5 (o-series) reasoning model**: Advanced multi-step reasoning with visible thought process
+- **Interactive reasoning display**: Each reasoning step shown in separate collapsible accordions
+- **Animated reasoning streams**: Real-time word-by-word display with Streamdown
 - **Autonomous tool orchestration**: AI independently decides which tools to use and when
 - **Multi-step reasoning**: Plans and executes complex research workflows
 - **7+ integrated tools**: Weather, climate, web search, scraping, crawling, extraction, accommodation search
@@ -97,7 +100,8 @@ Then restart the development server with `pnpm dev`.
 
 ### **Agentic AI & Tools**
 - **AI SDK 5** with agentic architecture for autonomous tool orchestration
-- **OpenAI GPT-4o-mini** for conversational intelligence and reasoning
+- **OpenAI GPT-5 (o-series)** for advanced reasoning with visible thought process
+- **Streamdown** for animated reasoning text streaming
 - **Model Context Protocol (MCP)** for standardized AI tool integration
 - **@modelcontextprotocol/sdk** for Firecrawl SSE transport
 
@@ -119,6 +123,8 @@ Then restart the development server with `pnpm dev`.
 
 ## 🎯 Project Highlights
 
+- **GPT-5 Reasoning Model**: Multi-step reasoning with interactive accordion visualization
+- **Animated Reasoning Streams**: Real-time word-by-word display of AI thought process
 - **Agentic Architecture**: AI autonomously decides which tools to use for each query
 - **Model Context Protocol**: Industry-standard integration with Firecrawl MCP server
 - **Multi-Tool Orchestration**: Seamlessly combines 7+ tools for comprehensive answers
@@ -133,11 +139,13 @@ Then restart the development server with `pnpm dev`.
 
 This project demonstrates proficiency in:
 - **Agentic AI systems** with autonomous decision-making and tool orchestration
+- **GPT-5 (o-series) integration** with multi-step reasoning visualization
+- **Reasoning stream processing** with unique ID tracking and animated UI
 - **Model Context Protocol (MCP)** for standardized AI tool integration
 - Modern React ecosystem and Next.js best practices
 - AI/ML integration with conversational interfaces
 - **Multi-source API orchestration** across 4+ external services
-- Real-time streaming with SSE transport
+- Real-time streaming with SSE transport and Streamdown animation
 - Advanced prompt engineering for agent behavior
 - User-centered design and accessibility standards
 - Full-stack TypeScript development
@@ -145,5 +153,5 @@ This project demonstrates proficiency in:
 ## 🔗 Links
 
 - **GitHub Repository**: [dr-regier/booking-agent-ts](https://github.com/dr-regier/booking-agent-ts)
-- **Technologies**: Next.js 15, TypeScript, AI SDK 5, Model Context Protocol, Firecrawl, OpenWeatherMap, Vectorize, SerpApi, OpenAI GPT-4o-mini
+- **Technologies**: Next.js 15, TypeScript, AI SDK 5, OpenAI GPT-5 (o-series), Model Context Protocol, Streamdown, Firecrawl, OpenWeatherMap, Vectorize, SerpApi
 - **YouTube Demo**: https://www.youtube.com/watch?v=etMSey1v4es

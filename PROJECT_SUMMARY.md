@@ -23,7 +23,10 @@ A unified **agentic AI travel platform** that autonomously orchestrates multiple
 
 ### **Agentic AI Architecture**
 - **Autonomous tool orchestration**: AI independently selects and combines 7+ tools
-- **Multi-step reasoning**: Plans and executes complex research workflows
+- **Multi-step reasoning**: GPT-5 (o-series) plans and executes complex research workflows
+- **Visible reasoning process**: Each reasoning step displayed in separate collapsible accordions
+- **Animated reasoning streams**: Real-time word-by-word display with Streamdown
+- **Stream event handling**: Tracks `reasoning-start`, `reasoning-delta`, `reasoning-end` events by unique IDs
 - **Natural language understanding**: Parses travel requests and extracts structured criteria
 - **Context-aware responses**: Maintains conversation context across multiple tool calls
 - **Parallel execution**: Runs multiple tools simultaneously for efficient responses
@@ -80,8 +83,10 @@ A unified **agentic AI travel platform** that autonomously orchestrates multiple
 - **Next.js 15** with App Router and Turbopack for optimal performance
 - **TypeScript** throughout for type safety and developer experience
 - **AI SDK 5** with agentic architecture for autonomous tool orchestration
+- **OpenAI GPT-5 (o-series)** reasoning model with multi-step thought visualization
 - **Model Context Protocol (MCP)** for standardized AI tool integration
 - **@modelcontextprotocol/sdk** for Firecrawl SSE transport
+- **Streamdown** for animated reasoning text streaming
 - **shadcn/ui** component system for consistent, accessible design
 - **Tailwind CSS v4** for responsive, utility-first styling
 
@@ -97,6 +102,9 @@ A unified **agentic AI travel platform** that autonomously orchestrates multiple
 - **Resource optimization**: Efficient API usage with smart caching strategies
 
 ### **User Experience Innovations**
+- **Interactive reasoning display**: Each GPT-5 reasoning step in collapsible accordions
+- **Animated reasoning streams**: Word-by-word streaming with Streamdown for natural "thinking" effect
+- **Multi-step reasoning visualization**: Separate accordions for each reasoning phase (planning, research, synthesis)
 - **Interactive weather widgets** with real-time data visualization
 - **Temperature unit toggle** for Celsius/Fahrenheit preferences
 - **Real-time progress visualization** with animated indicators for search operations
@@ -115,10 +123,12 @@ A unified **agentic AI travel platform** that autonomously orchestrates multiple
 
 ### **AI & Agentic Systems**
 - **Agentic architecture**: Autonomous multi-step reasoning and tool orchestration
+- **GPT-5 (o-series) integration**: Advanced reasoning model with visible thought process
+- **Reasoning stream processing**: Multi-step reasoning display with unique ID tracking
 - **Model Context Protocol (MCP)**: Standardized AI tool integration
 - **Large Language Model integration**: Advanced prompt engineering for agent behavior
 - **Natural language processing**: Structured data extraction from unstructured text
-- **Conversational UI/UX design**: Context-aware multi-turn dialogue patterns
+- **Conversational UI/UX design**: Context-aware multi-turn dialogue patterns with reasoning visualization
 - **Tool selection logic**: AI decision-making for optimal tool combinations
 
 ### **API Integration & Data Processing**
@@ -142,6 +152,9 @@ A unified **agentic AI travel platform** that autonomously orchestrates multiple
 
 ### **Technical Challenges**
 - **Agentic architecture design**: Building autonomous decision-making system for tool selection and orchestration
+- **GPT-5 reasoning integration**: Implementing multi-step reasoning display with stream event tracking
+- **Reasoning stream processing**: Tracking multiple reasoning steps by unique IDs (`reasoning-start`, `reasoning-delta`, `reasoning-end`)
+- **Animated UI streaming**: Integrating Streamdown for word-by-word reasoning visualization
 - **Model Context Protocol integration**: Implementing standardized MCP client with SSE transport for Firecrawl
 - **Multi-API orchestration**: Coordinating 4+ external APIs (OpenWeatherMap, Vectorize, Firecrawl, SerpApi) with different patterns
 - **Tool wrapping and observability**: Creating logging infrastructure to track agent decisions and tool execution
@@ -152,9 +165,12 @@ A unified **agentic AI travel platform** that autonomously orchestrates multiple
 
 ### **User Experience Challenges**
 - **Transparent agent behavior**: Making autonomous tool decisions visible and understandable to users
+- **Reasoning visualization**: Displaying multi-step GPT-5 reasoning in intuitive, collapsible accordions
+- **Stream synchronization**: Coordinating multiple reasoning steps streaming simultaneously
+- **Interactive reasoning UI**: Auto-open/close behavior with manual control for each reasoning step
 - **Seamless multi-tool integration**: Synthesizing data from 4+ sources into coherent responses
 - **Interactive widget design**: Professional weather cards and structured results in chat interface
-- **Complex state synchronization**: Real-time updates across chat, weather widgets, web research results
+- **Complex state synchronization**: Real-time updates across chat, reasoning steps, weather widgets, web research results
 - **Performance vs completeness**: Balancing thorough research with response speed
 - **Error handling**: Graceful degradation when individual tools fail without breaking conversation
 - **Loading states**: Clear feedback during multi-step agent reasoning and tool execution
@@ -172,6 +188,8 @@ A unified **agentic AI travel platform** that autonomously orchestrates multiple
 
 ### **Demonstrates Proficiency In:**
 - **Agentic AI systems**: Autonomous decision-making and multi-step reasoning
+- **GPT-5 (o-series) integration**: Advanced reasoning model with visible thought process
+- **Reasoning stream processing**: Multi-event stream handling with unique ID tracking
 - **Model Context Protocol (MCP)**: Standardized AI tool integration
 - Modern React ecosystem and Next.js best practices
 - AI/ML integration with conversational interfaces
