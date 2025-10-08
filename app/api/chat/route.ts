@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, UIMessage, convertToModelMessages } from 'ai';
+import { streamText, UIMessage, convertToModelMessages, stepCountIs } from 'ai';
 import { NextRequest } from 'next/server';
 import { weatherTool } from '@/lib/tools/weather-tool';
 import { vectorizeTool } from '@/lib/tools/vectorize-tool';
@@ -16,32 +16,14 @@ const TRAVEL_AGENT_SYSTEM_PROMPT = `You are an intelligent Travel Assistant Agen
 1. **weather** - Get current weather conditions and forecasts for any city
    - Use when: User asks about current weather, today's conditions, or short-term forecasts
    - Example queries: "What's the weather in Miami today?", "Current conditions in Paris"
+   - Strip off the state from the city name if it's included.
 
-2. **historicalWeather** - Get historical weather patterns and seasonal climate data for Miami
-   - Use when: User asks about best time to visit, seasonal patterns, typical weather by month
-   - Example queries: "When's the best time to visit Miami?", "What's Miami like in November?"
-   - Note: Currently focused on Miami data
+2. **historicalWeather** - Get historical weather patterns and seasonal climate data for Miami.
+   - Use when: User asks about best time to visit, seasonal patterns, typical weather by month.
+   - Example queries: "When's the best time to visit Miami?", "What's Miami like in November?", "What is the hottest day of the month/year?", "What is the record high/low temperature?"
+   - Note: Currently focused on Miami data.
 
-3. **firecrawl_search** - Search the web for information about destinations, hotels, restaurants, attractions
-   - Use when: User needs recommendations, wants to find specific places, or research options
-   - Example queries: "Find beachfront hotels in Miami", "Best Cuban restaurants in Little Havana"
-   - Returns: Web search results with titles, descriptions, and URLs
-
-4. **firecrawl_scrape** - Extract detailed content from a specific URL
-   - Use when: User provides a specific URL or you need details from a search result
-   - Example: Scraping a hotel website for amenities and reviews
-
-5. **firecrawl_crawl** - Deep crawl a website to gather comprehensive information
-   - Use when: You need extensive information from a website (multiple pages)
-   - Example: Crawling a destination's official tourism website
-
-6. **firecrawl_extract** - Extract structured data from web pages using prompts or schemas
-   - Use when: You need specific structured information from websites
-   - Example: Extracting hotel pricing, ratings, and availability
-
-7. **firecrawl_deep_research** - Conduct comprehensive research on a topic
-   - Use when: User needs in-depth information about complex topics
-   - Example: "Research Miami's Art Deco architecture and history"
+3. **firecrawlTools** - Use Firecrawl tools when you need detailed content extraction or web scraping.
 
 **Your Personality & Response Style:**
 - Warm, helpful, and enthusiastic about travel
@@ -66,10 +48,9 @@ const TRAVEL_AGENT_SYSTEM_PROMPT = `You are an intelligent Travel Assistant Agen
 - Don't mention technical details about tools to users - present information naturally
 - If a tool fails, gracefully continue the conversation with available information
 - Synthesize information from multiple tools into coherent, helpful responses
-- Focus on Miami as your specialty destination, but assist with other locations too
 
 **Your Goal:**
-Help users plan amazing Miami trips by autonomously gathering real-time weather data, historical climate insights, and comprehensive web research about accommodations, attractions, dining, and activities.`;
+Help users plan amazing trips by autonomously gathering real-time weather data, historical climate insights, and comprehensive web research about accommodations, attractions, dining, and activities.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -144,19 +125,19 @@ export async function POST(request: NextRequest) {
       model: openai('gpt-5'), 
       system: TRAVEL_AGENT_SYSTEM_PROMPT,
       messages: convertToModelMessages(messages),
-      tools: wrappedTools,
-      temperature: 0.7,
+      tools: allTools,
+      stopWhen: stepCountIs(10),
       // The agent can make multiple autonomous tool calls per turn
       // AI SDK 5.0 handles tool calling loops automatically
       // Note: GPT-4o-mini doesn't support reasoning options like GPT-o1
       // If you have access to GPT-o1, replace the model and add:
-      // providerOptions: {
-      //   openai: {
-      //     reasoning_effort: "low",
-      //     textVerbosity: "low",
-      //     reasoningSummary: "detailed",
-      //   },
-      // },
+      providerOptions: {
+         openai: {
+           reasoning_effort: "low",
+           textVerbosity: "low",
+           reasoningSummary: "detailed",
+         },
+       },
     });
 
     return result.toUIMessageStreamResponse();
