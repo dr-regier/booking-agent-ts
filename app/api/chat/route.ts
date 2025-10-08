@@ -10,7 +10,7 @@ export const maxDuration = 30;
 
 // Travel Agent System Prompt
 const TRAVEL_AGENT_SYSTEM_PROMPT = `You are an intelligent Travel Assistant Agent specializing in travel planning. You have access to multiple tools that you can use autonomously to help users with comprehensive travel research and planning.
-
+  
 **Your Available Tools:**
 
 1. **weather** - Get current weather conditions and forecasts for any city
@@ -139,7 +139,9 @@ export async function POST(request: NextRequest) {
        },
     });
 
-    return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse({
+      sendReasoning: true,
+    });
   } catch (error) {
     console.error('\n💥 ========================================');
     console.error('💥 TRAVEL AGENT ERROR');
